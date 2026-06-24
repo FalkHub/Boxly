@@ -458,6 +458,51 @@ textarea.input { resize: none; min-height: 84px; line-height: 1.5; }
   box-shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── STICKY INPUT BAR ───────────────────────────────── */
+.sticky-input-bar {
+  position: sticky;
+  bottom: 0;
+  background: rgba(10,10,10,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--c-border);
+  padding: 10px 16px calc(var(--sab) + 10px);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  z-index: 20;
+}
+.sticky-input-bar .input { flex: 1; padding: 11px 14px; font-size: 15px; }
+.btn-add {
+  background: var(--c-accent);
+  color: #0a0a0a;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-add:active { opacity: 0.75; }
+.btn-scan-icon {
+  background: var(--c-ai-bg);
+  border: 1px solid var(--c-ai-border);
+  border-radius: var(--r-md);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+.btn-scan-icon:active { opacity: 0.7; }
+.btn-scan-icon:disabled { opacity: 0.35; pointer-events: none; }
+
 </style>
 </head>
 <body>
@@ -540,15 +585,15 @@ textarea.input { resize: none; min-height: 84px; line-height: 1.5; }
         </div>
       </div>
 
-      <!-- Add item -->
-      <div class="card card-pad" style="display:flex;flex-direction:column;gap:10px">
-        <div class="input-row">
-          <input class="input" id="new-group-text" placeholder='Item or group name, e.g. "Books"' onkeydown="if(event.key==='Enter')addGroup()">
-          <button class="btn btn-accent btn-inline" onclick="addGroup()">Add</button>
-        </div>
-      </div>
-
       <button class="btn btn-danger-ghost" onclick="deleteCurrentBox()">Delete This Box</button>
+    </div>
+
+    <!-- Sticky add bar — box level -->
+    <div class="sticky-input-bar">
+      <input class="input" id="new-group-text" placeholder="Item or group name…" onkeydown="if(event.key==='Enter')addGroup()">
+      <button class="btn-add" onclick="addGroup()">Add</button>
+      <button class="btn-scan-icon" id="box-ai-btn" title="Scan with AI" onclick="tap('box-ai-input')">✦</button>
+      <input class="file-hidden" type="file" id="box-ai-input" accept="image/*" onchange="handleBoxAIScan(this)">
     </div>
   </div>
 
@@ -586,24 +631,19 @@ textarea.input { resize: none; min-height: 84px; line-height: 1.5; }
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="section-hdr" style="margin-bottom:0"><span class="section-title">Sub-items</span></div>
 
-        <!-- AI SCAN — prominent -->
-        <button class="btn btn-ai" id="ai-scan-btn" onclick="tap('ai-input')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          Scan with AI — Photo to Items
-        </button>
         <input class="file-hidden" type="file" id="ai-input" accept="image/*" onchange="handleAIScan(this)">
-
         <div class="subitem-list" id="subitem-list"></div>
-
-        <div class="input-row">
-          <input class="input" id="new-subitem-text" placeholder="Add sub-item manually…" onkeydown="if(event.key==='Enter')addSubitem()">
-          <button class="btn btn-ghost btn-inline" onclick="addSubitem()">Add</button>
-        </div>
       </div>
     </div>
 
-    <div class="sticky-footer">
-      <button class="btn btn-accent" onclick="saveGroup()">Save Changes</button>
+    <!-- Sticky bar: manual add + AI scan + save -->
+    <div class="sticky-input-bar" style="flex-wrap:wrap;gap:8px">
+      <div style="display:flex;gap:8px;flex:1;min-width:0">
+        <input class="input" id="new-subitem-text" placeholder="Sub-item…" onkeydown="if(event.key==='Enter')addSubitem()" style="flex:1">
+        <button class="btn-add" onclick="addSubitem()">Add</button>
+        <button class="btn-scan-icon" id="grp-ai-btn" title="Scan with AI" onclick="tap('ai-input')">✦</button>
+      </div>
+      <button class="btn btn-accent" style="width:100%;padding:11px" onclick="saveGroup()">Save Changes</button>
     </div>
   </div>
 
@@ -771,6 +811,28 @@ function createBox() {
   push({ action:'createBox', boxNum:num, boxLabel:label });
 }
 
+// ── BOX-LEVEL AI SCAN (whole room → creates item groups) ──────────────────
+async function handleBoxAIScan(input) {
+  const file = input.files[0]; if (!file) return;
+  const btn = document.getElementById('box-ai-btn');
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const b64 = await compress(file, 1600);
+    const b   = box();
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'scanWithAI', imageBase64:b64, groupName:'items in this room' })
+    });
+    const data = await res.json();
+    if (!data.success || !data.items || !data.items.length) { toast('No items detected — try a clearer photo'); return; }
+    S.aiItems = data.items.map((name,i) => ({ name, sel:true, id:i }));
+    S.aiMode  = 'box'; // tells confirmAI where to add
+    renderAISheet();
+    document.getElementById('ai-overlay').classList.add('open');
+  } catch(e) { console.error(e); toast('AI scan failed'); }
+  finally { btn.disabled = false; btn.textContent = '✦'; input.value = ''; }
+}
+
 // ── BOX DETAIL ───────────────────────────────────────────
 function renderBox() {
   const b = box(); if (!b) return;
@@ -889,6 +951,7 @@ async function handleAIScan(input) {
   try {
     const b64 = await compress(file, 1600);
     const g   = group();
+    S.aiMode  = 'group';
     const res = await fetch(SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({ action:'scanWithAI', imageBase64:b64, groupName: g ? g.name : 'items' })
@@ -922,12 +985,27 @@ function toggleAI(i) {
   el.querySelector('.ai-check').textContent = S.aiItems[i].sel ? '✓' : '';
 }
 function confirmAI() {
-  const g = group(); if (!g) return;
   const sel = S.aiItems.filter(i => i.sel);
   if (!sel.length) { toast('Nothing selected'); return; }
-  sel.forEach(item => g.subitems.push({ id: Date.now().toString()+Math.random(), name:item.name, photos:[] }));
-  save(); renderSubitems(); closeAI();
-  toast(`${sel.length} item${sel.length!==1?'s':''} added ✓`);
+
+  if (S.aiMode === 'box') {
+    // Add as top-level item groups in the box
+    const b = box(); if (!b) return;
+    sel.forEach(item => {
+      const g = { id: Date.now().toString()+Math.random(), name:item.name, notes:'', photos:[], subitems:[] };
+      b.groups.push(g);
+      push({ action:'addItem', boxNum:b.num, boxLabel:b.label, itemId:g.id, itemText:item.name, notes:'', photoUrls:'[]', subitems:'[]' });
+    });
+    save(); renderBox(); renderHome();
+    toast(`${sel.length} item${sel.length!==1?'s':''} added to box ✓`);
+  } else {
+    // Add as sub-items inside a group
+    const g = group(); if (!g) return;
+    sel.forEach(item => g.subitems.push({ id: Date.now().toString()+Math.random(), name:item.name, photos:[] }));
+    save(); renderSubitems();
+    toast(`${sel.length} sub-item${sel.length!==1?'s':''} added ✓`);
+  }
+  closeAI();
 }
 function closeAI() { document.getElementById('ai-overlay').classList.remove('open'); S.aiItems = []; }
 
