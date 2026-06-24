@@ -4,683 +4,662 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Boxly">
 <title>Boxly</title>
 <style>
-/* ── RESET & TOKENS ─────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
+/* ── DESIGN TOKENS ──────────────────────────────────── */
 :root {
-  /* Palette */
-  --c-bg:        #0a0a0a;
-  --c-s1:        #141414;
-  --c-s2:        #1c1c1c;
-  --c-s3:        #242424;
-  --c-border:    #2a2a2a;
-  --c-text:      #f2efe9;
-  --c-text2:     #8a8a8a;
-  --c-text3:     #555;
-  --c-accent:    #c9a97a;
-  --c-accent-bg: rgba(201,169,122,0.08);
-  --c-danger:    #e05252;
-  --c-ai:        #7c6aff;
-  --c-ai-bg:     rgba(124,106,255,0.10);
-  --c-ai-border: rgba(124,106,255,0.30);
-  --c-green:     #4ade80;
-
-  /* Radius */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 20px;
-
-  /* Safe areas */
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-
-  /* Transitions */
-  --t-fast: 140ms ease;
+  --bg:          #F2F2F7;
+  --bg2:         #FFFFFF;
+  --bg3:         #F2F2F7;
+  --surface:     #FFFFFF;
+  --surface2:    #F2F2F7;
+  --border:      rgba(0,0,0,0.10);
+  --border2:     rgba(0,0,0,0.06);
+  --text:        #1C1C1E;
+  --text2:       #6C6C70;
+  --text3:       #AEAEB2;
+  --accent:      #A07850;
+  --accent-bg:   rgba(160,120,80,0.10);
+  --accent-border: rgba(160,120,80,0.25);
+  --blue:        #007AFF;
+  --green:       #34C759;
+  --red:         #FF3B30;
+  --orange:      #FF9500;
+  --purple:      #AF52DE;
+  --r-sm:        8px;
+  --r-md:        12px;
+  --r-lg:        16px;
+  --r-xl:        20px;
+  --sat:         env(safe-area-inset-top, 0px);
+  --sab:         env(safe-area-inset-bottom, 0px);
+  --shadow:      0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 16px rgba(0,0,0,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:          #000000;
+    --bg2:         #1C1C1E;
+    --bg3:         #000000;
+    --surface:     #1C1C1E;
+    --surface2:    #2C2C2E;
+    --border:      rgba(255,255,255,0.10);
+    --border2:     rgba(255,255,255,0.06);
+    --text:        #FFFFFF;
+    --text2:       #98989D;
+    --text3:       #48484A;
+    --accent:      #C9A97A;
+    --accent-bg:   rgba(201,169,122,0.12);
+    --accent-border: rgba(201,169,122,0.25);
+    --blue:        #0A84FF;
+    --green:       #30D158;
+    --red:         #FF453A;
+    --orange:      #FF9F0A;
+    --purple:      #BF5AF2;
+    --shadow:      0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md:   0 4px 16px rgba(0,0,0,0.4);
+  }
 }
 
+/* ── RESET ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { width: 100%; overflow-x: hidden; height: 100%; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-  background: var(--c-bg);
-  color: var(--c-text);
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
 }
-
-#app { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+#app { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
 
 /* ── HEADER ─────────────────────────────────────────── */
 .hdr {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: calc(var(--sat) + 12px) 16px 12px;
-  background: rgba(10,10,10,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--c-border);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  min-height: 52px;
+  display: flex; align-items: center; gap: 4px;
+  padding: calc(var(--sat) + 10px) 16px 10px;
+  background: rgba(var(--bg-rgb, 242,242,247), 0.85);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+  min-height: 50px;
 }
+@media (prefers-color-scheme: dark) { .hdr { background: rgba(0,0,0,0.85); } }
 .hdr-back {
-  display: none;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: var(--c-accent);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 6px 8px 6px 0;
-  white-space: nowrap;
-  flex-shrink: 0;
+  display: none; align-items: center; gap: 2px;
+  background: none; border: none; color: var(--blue);
+  font-size: 16px; font-weight: 400; cursor: pointer;
+  padding: 6px 8px 6px 2px; white-space: nowrap; flex-shrink: 0;
 }
-.hdr-back svg { width: 9px; height: 15px; }
-.hdr-title {
-  flex: 1;
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.hdr-back svg { width: 10px; height: 16px; margin-right: 1px; }
+.hdr-title { flex: 1; font-size: 17px; font-weight: 600; letter-spacing: -0.4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.hdr-btn {
+  background: none; border: none; color: var(--blue);
+  font-size: 15px; cursor: pointer; padding: 6px;
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; flex-shrink: 0;
 }
-.hdr-action {
-  background: none;
-  border: none;
-  color: var(--c-text2);
-  font-size: 20px;
-  cursor: pointer;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--r-sm);
-  flex-shrink: 0;
-  transition: background var(--t-fast);
-}
-.hdr-action:active { background: var(--c-s2); }
+.hdr-btn:active { background: var(--surface2); }
+.hdr-btn svg { width: 18px; height: 18px; }
 
-/* Sync indicator */
+/* Sync */
 .sync-pill {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  background: var(--c-s2);
-  color: var(--c-text3);
-  border: 1px solid var(--c-border);
-  transition: all 0.3s;
-  flex-shrink: 0;
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  background: var(--surface2); color: var(--text3); border: 1px solid var(--border);
+  flex-shrink: 0; white-space: nowrap; transition: all 0.3s;
 }
-.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c-text3); transition: all 0.3s; }
-.sync-pill.syncing { color: #f59e0b; border-color: rgba(245,158,11,0.3); }
-.sync-pill.syncing .sync-dot { background: #f59e0b; animation: pulse 1s infinite; }
-.sync-pill.synced { color: var(--c-green); border-color: rgba(74,222,128,0.3); }
-.sync-pill.synced .sync-dot { background: var(--c-green); }
-.sync-pill.error { color: var(--c-danger); border-color: rgba(224,82,82,0.3); }
-.sync-pill.error .sync-dot { background: var(--c-danger); }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); transition: all 0.3s; }
+.sync-pill.syncing { color: var(--orange); }
+.sync-pill.syncing .sync-dot { background: var(--orange); animation: pulse 1s infinite; }
+.sync-pill.synced { color: var(--green); }
+.sync-pill.synced .sync-dot { background: var(--green); }
+.sync-pill.error { color: var(--red); }
+.sync-pill.error .sync-dot { background: var(--red); }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 /* ── PAGES ──────────────────────────────────────────── */
-.page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; }
+.page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--bg); }
 .page.active { display: block; }
-.page-pad { padding: 20px 16px calc(var(--sab) + 40px); display: flex; flex-direction: column; gap: 20px; }
+.pg { padding: 16px 16px calc(var(--sab) + 80px); display: flex; flex-direction: column; gap: 16px; }
 
-/* ── HOME PAGE ──────────────────────────────────────── */
-.home-hero {
-  background: linear-gradient(135deg, var(--c-s1) 0%, #1a160e 100%);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-xl);
-  padding: 20px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  overflow: hidden;
-  position: relative;
+/* ── LOADING OVERLAY ────────────────────────────────── */
+#loading-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  z-index: 999; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
 }
-.home-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 30% 50%, rgba(201,169,122,0.06) 0%, transparent 60%);
-  pointer-events: none;
+#loading-overlay.show { display: flex; }
+.loading-card {
+  background: var(--surface); border-radius: var(--r-xl);
+  padding: 28px 36px; display: flex; flex-direction: column;
+  align-items: center; gap: 14px; box-shadow: var(--shadow-md);
 }
-.hero-stat { padding: 4px 16px 4px 0; }
-.hero-stat + .hero-stat { padding-left: 16px; border-left: 1px solid var(--c-border); }
-.hero-num { font-size: 40px; font-weight: 700; color: var(--c-accent); letter-spacing: -2px; line-height: 1; }
-.hero-label { font-size: 11px; color: var(--c-text3); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; font-weight: 600; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; font-weight: 500; color: var(--text2); }
 
-.section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.section-title { font-size: 12px; font-weight: 700; color: var(--c-text3); text-transform: uppercase; letter-spacing: 0.8px; }
+/* ── HERO STATS ─────────────────────────────────────── */
+.hero {
+  background: var(--surface); border-radius: var(--r-xl);
+  padding: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.hero-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.hero-stat + .hero-stat { border-left: 1px solid var(--border); }
+.hero-num { font-size: 34px; font-weight: 700; color: var(--accent); letter-spacing: -1.5px; line-height: 1; }
+.hero-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
 
-/* Box cards */
+/* ── SECTION HDR ────────────────────────────────────── */
+.sec-hdr { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+.sec-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── BOX CARDS ──────────────────────────────────────── */
 .box-list { display: flex; flex-direction: column; gap: 10px; }
 .box-card {
-  background: var(--c-s1);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  cursor: pointer;
-  transition: border-color var(--t-fast);
-  text-align: left;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); overflow: hidden;
+  cursor: pointer; text-align: left; color: var(--text);
+  box-shadow: var(--shadow); transition: transform 0.12s;
   width: 100%;
-  color: var(--c-text);
 }
-.box-card:active { border-color: var(--c-accent); background: var(--c-s2); }
+.box-card:active { transform: scale(0.98); }
 .box-card-top { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
 .box-num-badge {
-  width: 36px; height: 36px;
-  background: var(--c-accent-bg);
-  border: 1px solid rgba(201,169,122,0.2);
-  border-radius: var(--r-sm);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 800;
-  color: var(--c-accent);
-  flex-shrink: 0;
+  width: 40px; height: 40px;
+  background: var(--accent-bg); border: 1px solid var(--accent-border);
+  border-radius: var(--r-md); display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: var(--accent); flex-shrink: 0;
 }
-.box-card-body { flex: 1; min-width: 0; }
-.box-card-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
-.box-card-meta { font-size: 12px; color: var(--c-text2); margin-top: 2px; }
-.box-card-arrow { color: var(--c-text3); font-size: 18px; }
-.box-photo-row { display: flex; gap: 6px; padding: 0 16px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.box-info { flex: 1; min-width: 0; }
+.box-name { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
+.box-meta { font-size: 12px; color: var(--text2); margin-top: 3px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.box-arrow { color: var(--text3); flex-shrink: 0; }
+.box-arrow svg { width: 8px; height: 13px; }
+.box-tags { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+.tag {
+  font-size: 11px; font-weight: 600; padding: 2px 8px;
+  border-radius: 20px; white-space: nowrap;
+}
+.tag-room  { background: rgba(0,122,255,0.10); color: var(--blue); }
+.tag-first { background: rgba(255,59,48,0.10); color: var(--red); }
+.tag-store { background: rgba(175,82,222,0.10); color: var(--purple); }
+.tag-normal { background: var(--surface2); color: var(--text3); }
+.box-photo-row { display: flex; gap: 6px; padding: 0 16px 14px; overflow-x: auto; }
 .box-photo-row::-webkit-scrollbar { display: none; }
-.box-photo-row img { width: 52px; height: 52px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); flex-shrink: 0; cursor: pointer; }
+.box-photo-row img { width: 54px; height: 54px; border-radius: var(--r-md); object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; cursor: pointer; }
+
+/* ── GROUPED LIST (iOS style) ───────────────────────── */
+.grouped { background: var(--surface); border-radius: var(--r-xl); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); }
+.grouped-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-bottom: 1px solid var(--border2);
+  min-height: 52px;
+}
+.grouped-row:last-child { border-bottom: none; }
+.grouped-row-label { font-size: 15px; color: var(--text2); flex-shrink: 0; min-width: 90px; }
+.grouped-row-value { flex: 1; font-size: 15px; font-weight: 500; text-align: right; color: var(--text); }
+.grouped-row-input {
+  flex: 1; background: none; border: none; outline: none;
+  font-size: 15px; color: var(--text); text-align: right;
+  font-family: inherit; padding: 0;
+}
+.grouped-row-input::placeholder { color: var(--text3); }
+
+/* ── INPUTS ─────────────────────────────────────────── */
+.field-lbl { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; padding: 0 4px; }
+.input {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 13px 14px;
+  font-size: 16px; color: var(--text); width: 100%;
+  outline: none; -webkit-appearance: none; font-family: inherit;
+  box-shadow: var(--shadow); transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--blue); }
+.input::placeholder { color: var(--text3); }
+textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
+.fhidden { display: none; }
 
 /* ── BUTTONS ────────────────────────────────────────── */
 .btn {
-  width: 100%;
-  padding: 14px 20px;
-  border: none;
-  border-radius: var(--r-md);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  letter-spacing: -0.2px;
-  transition: opacity var(--t-fast);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 14px 20px; border: none; border-radius: var(--r-lg);
+  font-size: 16px; font-weight: 600; cursor: pointer;
+  width: 100%; font-family: inherit; letter-spacing: -0.2px;
+  transition: opacity 0.12s, transform 0.12s;
 }
-.btn:active { opacity: 0.75; }
+.btn:active { opacity: 0.75; transform: scale(0.98); }
 .btn:disabled { opacity: 0.35; pointer-events: none; }
-.btn-accent { background: var(--c-accent); color: #0a0a0a; }
-.btn-ghost { background: var(--c-s2); color: var(--c-text); border: 1px solid var(--c-border); }
-.btn-danger-ghost { background: none; color: var(--c-danger); border: 1px solid rgba(224,82,82,0.25); }
-.btn-ai {
-  background: var(--c-ai-bg);
-  color: var(--c-ai);
-  border: 1px solid var(--c-ai-border);
-  font-size: 14px;
-  font-weight: 700;
-}
-.btn-sm { padding: 9px 14px; font-size: 13px; border-radius: var(--r-sm); }
-.btn-inline { width: auto; padding: 12px 18px; }
+.btn-blue  { background: var(--blue); color: #fff; }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-ghost  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-danger { background: none; color: var(--red); border: 1px solid rgba(255,59,48,0.25); }
+.btn-sm { padding: 10px 14px; font-size: 14px; border-radius: var(--r-md); }
+.btn-inline { width: auto; }
 
-.ai-spinner { width: 15px; height: 15px; border: 2px solid var(--c-ai-border); border-top-color: var(--c-ai); border-radius: 50%; animation: spin 0.6s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── INPUTS ─────────────────────────────────────────── */
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field-label { font-size: 11px; font-weight: 700; color: var(--c-text3); text-transform: uppercase; letter-spacing: 0.6px; }
-.input {
-  background: var(--c-s1);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-md);
-  padding: 13px 14px;
-  font-size: 16px;
-  color: var(--c-text);
-  width: 100%;
-  outline: none;
-  -webkit-appearance: none;
-  font-family: inherit;
-  transition: border-color var(--t-fast);
+/* ── SELECT / DROPDOWN ──────────────────────────────── */
+.sel-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 13px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
 }
-.input:focus { border-color: rgba(201,169,122,0.5); }
-.input::placeholder { color: var(--c-text3); }
-textarea.input { resize: none; min-height: 84px; line-height: 1.5; }
-.input-row { display: flex; gap: 8px; }
-.input-row .input { flex: 1; }
-.file-hidden { display: none; }
-
-/* ── CARD SHELL ─────────────────────────────────────── */
-.card {
-  background: var(--c-s1);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
+.sel-row label { font-size: 15px; color: var(--text2); flex-shrink: 0; }
+.sel-row select {
+  flex: 1; background: none; border: none; outline: none;
+  font-size: 15px; font-weight: 500; color: var(--text);
+  font-family: inherit; text-align: right; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
 }
-.card-pad { padding: 14px 16px; }
+.sel-row select option { background: var(--surface); color: var(--text); }
 
-/* ── PHOTO GRID ─────────────────────────────────────── */
-.photo-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.photo-thumb-wrap { position: relative; }
-.photo-thumb-wrap img { border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); display: block; cursor: pointer; }
-.thumb-sm img { width: 64px; height: 64px; }
-.thumb-md img { width: 80px; height: 80px; }
-.photo-del {
-  position: absolute; top: -5px; right: -5px;
-  width: 20px; height: 20px;
-  background: var(--c-danger);
-  border: 2px solid var(--c-bg);
-  border-radius: 50%;
-  color: #fff;
-  font-size: 10px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
+/* ── PRIORITY PILL ──────────────────────────────────── */
+.priority-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 13px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow); cursor: pointer; width: 100;
 }
-.photo-add-btns { display: flex; gap: 8px; margin-top: 2px; }
+.priority-btn label { font-size: 15px; color: var(--text2); flex: 1; text-align: left; }
+.priority-val { font-size: 14px; font-weight: 600; }
+
+/* ── MEDIA GRID ─────────────────────────────────────── */
+.media-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 14px; box-shadow: var(--shadow); }
+.media-label { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 12px; }
+.media-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; min-height: 0; }
+.media-wrap { position: relative; }
+.media-wrap img { border-radius: var(--r-md); object-fit: cover; border: 1px solid var(--border); display: block; cursor: pointer; }
+.media-sm img { width: 72px; height: 72px; }
+.media-md img { width: 88px; height: 88px; }
+.media-del {
+  position: absolute; top: -6px; right: -6px;
+  width: 20px; height: 20px; background: var(--red);
+  border: 2px solid var(--surface); border-radius: 50%;
+  color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.media-empty { color: var(--text3); font-size: 13px; text-align: center; padding: 12px 0; display: none; }
+.media-btns { display: flex; gap: 8px; }
+.media-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 8px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-md); font-size: 13px; font-weight: 500; color: var(--text);
+  cursor: pointer; font-family: inherit;
+}
+.media-btn:active { opacity: 0.7; }
+.media-btn svg { width: 16px; height: 16px; color: var(--text2); flex-shrink: 0; }
 
 /* ── GROUP CARDS ────────────────────────────────────── */
 .group-list { display: flex; flex-direction: column; gap: 8px; }
 .group-card {
-  background: var(--c-s1);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow);
 }
-.group-card-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 16px;
-  cursor: pointer;
+.group-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; }
+.group-row:active { background: var(--surface2); }
+.group-thumb {
+  width: 44px; height: 44px; border-radius: var(--r-md);
+  object-fit: cover; border: 1px solid var(--border); flex-shrink: 0;
 }
-.group-card-row:active { background: var(--c-s2); }
-.group-thumb { width: 42px; height: 42px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); flex-shrink: 0; }
-.group-no-thumb {
-  width: 42px; height: 42px;
-  border-radius: var(--r-sm);
-  background: var(--c-s2);
-  border: 1px solid var(--c-border);
+.group-placeholder {
+  width: 44px; height: 44px; border-radius: var(--r-md);
+  background: var(--surface2); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
   flex-shrink: 0;
 }
+.group-placeholder svg { width: 20px; height: 20px; color: var(--text3); }
 .group-info { flex: 1; min-width: 0; }
 .group-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
-.group-meta { font-size: 12px; color: var(--c-text2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.group-arrow { color: var(--c-text3); font-size: 18px; flex-shrink: 0; }
-.group-del { background: none; border: none; color: var(--c-text3); font-size: 18px; cursor: pointer; padding: 4px 2px; flex-shrink: 0; }
-.group-del:active { color: var(--c-danger); }
+.group-meta { font-size: 12px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.group-chevron svg { width: 8px; height: 13px; color: var(--text3); }
+.group-del { background: none; border: none; color: var(--text3); cursor: pointer; padding: 6px; flex-shrink: 0; }
+.group-del:active { color: var(--red); }
+.group-del svg { width: 16px; height: 16px; }
 
 /* ── SUB-ITEMS ──────────────────────────────────────── */
-.subitem-list { display: flex; flex-direction: column; gap: 6px; }
-.subitem-card {
-  background: var(--c-s2);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-md);
-  overflow: hidden;
-}
-.subitem-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; }
-.subitem-icon { font-size: 13px; color: var(--c-text3); flex-shrink: 0; }
-.subitem-name { flex: 1; font-size: 14px; font-weight: 500; }
-.subitem-photo-badge { font-size: 11px; color: var(--c-text3); background: var(--c-s3); border-radius: 20px; padding: 2px 7px; flex-shrink: 0; }
-.subitem-expand { background: none; border: none; color: var(--c-text3); font-size: 15px; cursor: pointer; padding: 3px 6px; }
-.subitem-del { background: none; border: none; color: var(--c-text3); font-size: 15px; cursor: pointer; padding: 3px 6px; }
-.subitem-del:active { color: var(--c-danger); }
-.subitem-body { border-top: 1px solid var(--c-border); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.subitem-body.hidden { display: none; }
-.subitem-photos { display: flex; gap: 6px; flex-wrap: wrap; }
-.subitem-photo-wrap { position: relative; }
-.subitem-photo-wrap img { width: 60px; height: 60px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); cursor: pointer; display: block; }
-.subitem-photo-del { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: var(--c-danger); border: 2px solid var(--c-bg); border-radius: 50%; color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.sub-list { display: flex; flex-direction: column; gap: 6px; }
+.sub-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow); }
+.sub-row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; }
+.sub-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+.sub-name { flex: 1; font-size: 14px; font-weight: 500; }
+.sub-badge { font-size: 11px; color: var(--text3); background: var(--surface2); border-radius: 20px; padding: 2px 8px; flex-shrink: 0; }
+.sub-expand { background: none; border: none; color: var(--text2); cursor: pointer; padding: 4px 6px; font-size: 15px; }
+.sub-del    { background: none; border: none; color: var(--text3); cursor: pointer; padding: 4px 6px; }
+.sub-del:active { color: var(--red); }
+.sub-del svg { width: 14px; height: 14px; }
+.sub-body { border-top: 1px solid var(--border2); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.sub-body.hidden { display: none; }
+.sub-photos { display: flex; gap: 6px; flex-wrap: wrap; }
+.sub-photo-wrap { position: relative; }
+.sub-photo-wrap img { width: 64px; height: 64px; border-radius: var(--r-md); object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: block; }
+.sub-photo-del { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: var(--red); border: 2px solid var(--surface); border-radius: 50%; color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-/* ── DIVIDER ────────────────────────────────────────── */
-.divider { height: 1px; background: var(--c-border); }
-
-/* ── EMPTY STATE ────────────────────────────────────── */
-.empty-state { text-align: center; padding: 32px 20px; color: var(--c-text3); }
-.empty-state .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.5; }
-.empty-state p { font-size: 14px; line-height: 1.5; }
-
-/* ── STICKY SAVE ────────────────────────────────────── */
-.sticky-footer {
-  position: sticky;
-  bottom: 0;
-  background: rgba(10,10,10,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--c-border);
-  padding: 12px 16px calc(var(--sab) + 12px);
+/* ── STICKY BAR ─────────────────────────────────────── */
+.sticky-bar {
+  position: sticky; bottom: 0;
+  background: rgba(var(--bg-rgb,242,242,247),0.94);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px calc(var(--sab) + 10px);
+  display: flex; flex-direction: column; gap: 8px; z-index: 20;
 }
-
-/* ── AI BOTTOM SHEET ────────────────────────────────── */
-#ai-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
-  z-index: 200;
-  align-items: flex-end;
-  justify-content: center;
+@media (prefers-color-scheme: dark) { .sticky-bar { background: rgba(0,0,0,0.94); } }
+.bar-row { display: flex; gap: 8px; align-items: center; }
+.bar-input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 11px 14px;
+  font-size: 15px; color: var(--text); outline: none;
+  -webkit-appearance: none; font-family: inherit; box-shadow: var(--shadow);
 }
-#ai-overlay.open { display: flex; }
-.ai-sheet {
-  background: var(--c-s1);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-xl) var(--r-xl) 0 0;
-  width: 100%;
-  max-width: 430px;
-  max-height: 75vh;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: calc(var(--sab) + 8px);
+.bar-input::placeholder { color: var(--text3); }
+.bar-add {
+  background: var(--blue); color: #fff; border: none;
+  border-radius: var(--r-lg); padding: 11px 18px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0; font-family: inherit;
 }
-.ai-sheet-handle { width: 32px; height: 4px; background: var(--c-border); border-radius: 2px; margin: 10px auto; }
-.ai-sheet-hdr { padding: 4px 16px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--c-border); }
-.ai-sheet-title { font-size: 15px; font-weight: 700; color: var(--c-ai); display: flex; align-items: center; gap: 6px; }
-.ai-sheet-close { background: none; border: none; color: var(--c-text3); font-size: 22px; cursor: pointer; padding: 4px; }
-.ai-sheet-subtext { font-size: 12px; color: var(--c-text3); padding: 8px 16px 0; }
-.ai-items { flex: 1; overflow-y: auto; padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; }
-.ai-item {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--c-s2);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-md);
-  padding: 11px 14px;
-  cursor: pointer;
-  transition: border-color var(--t-fast);
-}
-.ai-item.selected { border-color: rgba(124,106,255,0.4); background: var(--c-ai-bg); }
-.ai-check {
-  width: 22px; height: 22px;
-  border-radius: 6px;
-  border: 1.5px solid var(--c-border);
-  background: var(--c-s1);
+.bar-add:active { opacity: 0.75; }
+.bar-scan {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); width: 44px; height: 44px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px;
-  flex-shrink: 0;
-  transition: all var(--t-fast);
+  cursor: pointer; flex-shrink: 0; box-shadow: var(--shadow);
+  color: var(--blue);
 }
-.ai-item.selected .ai-check { background: var(--c-ai); border-color: var(--c-ai); color: #fff; }
-.ai-item-name { flex: 1; font-size: 14px; line-height: 1.3; }
-.ai-sheet-footer { padding: 10px 16px 0; display: flex; gap: 8px; }
+.bar-scan:active { opacity: 0.7; }
+.bar-scan:disabled { opacity: 0.35; pointer-events: none; }
+.bar-scan svg { width: 18px; height: 18px; }
 
-/* ── SEARCH RESULTS ─────────────────────────────────── */
-.search-hit {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--c-s1);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-md);
-  padding: 12px 14px;
-  cursor: pointer;
-  margin-bottom: 8px;
-  text-align: left;
-  color: var(--c-text);
-  width: 100%;
-}
-.search-hit:active { background: var(--c-s2); }
-.hit-badge { font-size: 11px; font-weight: 700; color: var(--c-accent); min-width: 50px; flex-shrink: 0; }
-.hit-thumb { width: 34px; height: 34px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); flex-shrink: 0; }
+/* ── AI SHEET ───────────────────────────────────────── */
+#ai-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: flex-end; justify-content: center; }
+#ai-overlay.open { display: flex; }
+.ai-sheet { background: var(--surface); border-radius: var(--r-xl) var(--r-xl) 0 0; width: 100%; max-width: 430px; max-height: 78vh; display: flex; flex-direction: column; padding-bottom: calc(var(--sab) + 8px); box-shadow: var(--shadow-md); }
+.ai-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+.ai-hdr { padding: 12px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.ai-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.ai-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.ai-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; line-height: 1; }
+.ai-items { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+.ai-item { display: flex; align-items: center; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; cursor: pointer; transition: border-color 0.12s; }
+.ai-item.sel { border-color: var(--blue); background: rgba(0,122,255,0.06); }
+.ai-check { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--text3); background: var(--surface); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.12s; }
+.ai-item.sel .ai-check { background: var(--blue); border-color: var(--blue); color: #fff; }
+.ai-check svg { width: 12px; height: 12px; display: none; }
+.ai-item.sel .ai-check svg { display: block; }
+.ai-name { flex: 1; font-size: 14px; line-height: 1.3; }
+.ai-footer { padding: 10px 16px 0; display: flex; gap: 8px; }
+
+/* ── SEARCH ─────────────────────────────────────────── */
+.hit { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px 14px; cursor: pointer; margin-bottom: 8px; text-align: left; color: var(--text); width: 100%; box-shadow: var(--shadow); }
+.hit:active { background: var(--surface2); }
+.hit-badge { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 52px; flex-shrink: 0; }
+.hit-thumb { width: 36px; height: 36px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
 .hit-text { flex: 1; font-size: 14px; min-width: 0; }
-.hit-sub { font-size: 12px; color: var(--c-text3); flex-shrink: 0; }
+.hit-sub { font-size: 12px; color: var(--text3); flex-shrink: 0; }
 
 /* ── LIGHTBOX ───────────────────────────────────────── */
-#lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 300; align-items: center; justify-content: center; }
-#lightbox.open { display: flex; }
-#lightbox img { max-width: 96vw; max-height: 90vh; border-radius: var(--r-md); object-fit: contain; }
-#lightbox-close { position: absolute; top: calc(var(--sat) + 16px); right: 16px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 18px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#lb { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 300; align-items: center; justify-content: center; }
+#lb.open { display: flex; }
+#lb img { max-width: 96vw; max-height: 90vh; border-radius: var(--r-md); object-fit: contain; }
+#lb-close { position: absolute; top: calc(var(--sat) + 14px); right: 16px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 18px; }
 
 /* ── TOAST ──────────────────────────────────────────── */
-#toast {
-  position: fixed;
-  bottom: calc(var(--sab) + 28px);
-  left: 50%;
-  transform: translateX(-50%) translateY(12px);
-  background: var(--c-s2);
-  color: var(--c-text);
-  padding: 9px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  opacity: 0;
-  transition: all 0.2s ease;
-  z-index: 400;
-  white-space: nowrap;
-  border: 1px solid var(--c-border);
-  pointer-events: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-}
+#toast { position: fixed; bottom: calc(var(--sab) + 32px); left: 50%; transform: translateX(-50%) translateY(16px); background: var(--text); color: var(--bg); padding: 9px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; opacity: 0; transition: all 0.2s; z-index: 400; white-space: nowrap; pointer-events: none; box-shadow: var(--shadow-md); }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ── STICKY INPUT BAR ───────────────────────────────── */
-.sticky-input-bar {
-  position: sticky;
-  bottom: 0;
-  background: rgba(10,10,10,0.96);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--c-border);
-  padding: 10px 16px calc(var(--sab) + 10px);
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  z-index: 20;
-}
-.sticky-input-bar .input { flex: 1; padding: 11px 14px; font-size: 15px; }
-.btn-add {
-  background: var(--c-accent);
-  color: #0a0a0a;
-  border: none;
-  border-radius: var(--r-md);
-  padding: 11px 16px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.btn-add:active { opacity: 0.75; }
-.btn-scan-icon {
-  background: var(--c-ai-bg);
-  border: 1px solid var(--c-ai-border);
-  border-radius: var(--r-md);
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  font-size: 18px;
-}
-.btn-scan-icon:active { opacity: 0.7; }
-.btn-scan-icon:disabled { opacity: 0.35; pointer-events: none; }
+/* ── EMPTY STATE ────────────────────────────────────── */
+.empty { text-align: center; padding: 40px 20px; }
+.empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.empty p { font-size: 14px; color: var(--text2); line-height: 1.5; }
 
+/* ── DIVIDER ────────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); }
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- HEADER -->
-  <header class="hdr">
-    <button class="hdr-back" id="hdr-back" onclick="navBack()">
-      <svg viewBox="0 0 9 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1L1.5 7.5L8 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Back
+<!-- HEADER -->
+<header class="hdr">
+  <button class="hdr-back" id="hdr-back" onclick="navBack()">
+    <svg viewBox="0 0 10 16" fill="none"><path d="M9 1L1.5 8L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back
+  </button>
+  <span class="hdr-title" id="hdr-title">📦 Boxly</span>
+  <div class="sync-pill" id="sync-pill"><div class="sync-dot"></div><span id="sync-lbl">Sync</span></div>
+  <button class="hdr-btn" id="hdr-search" onclick="navTo('search')" title="Search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </button>
+</header>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="pg">
+    <div class="hero">
+      <div class="hero-stat"><div class="hero-num" id="s-boxes">0</div><div class="hero-label">Boxes</div></div>
+      <div class="hero-stat"><div class="hero-num" id="s-items">0</div><div class="hero-label">Items</div></div>
+      <div class="hero-stat"><div class="hero-num" id="s-subitems">0</div><div class="hero-label">Sub-items</div></div>
+    </div>
+    <div>
+      <div class="sec-hdr"><span class="sec-title">Boxes</span></div>
+      <div style="height:10px"></div>
+      <div class="box-list" id="box-list"><div class="empty"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap below to get started.</p></div></div>
+    </div>
+    <button class="btn btn-blue" onclick="navTo('add-box')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      New Box
     </button>
-    <span class="hdr-title" id="hdr-title">📦 Boxly</span>
-    <div class="sync-pill" id="sync-pill"><div class="sync-dot"></div><span id="sync-label">Sync</span></div>
-    <button class="hdr-action" id="hdr-search" onclick="navTo('search')" title="Search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    </button>
-  </header>
+  </div>
+</div>
 
-  <!-- ── HOME ── -->
-  <div class="page active" id="page-home">
-    <div class="page-pad">
-      <div class="home-hero">
-        <div class="hero-stat">
-          <div class="hero-num" id="stat-boxes">0</div>
-          <div class="hero-label">Boxes</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-num" id="stat-items">0</div>
-          <div class="hero-label">Items</div>
-        </div>
+<!-- ADD BOX -->
+<div class="page" id="page-add-box">
+  <div class="pg">
+    <div class="field-lbl">Box Label</div>
+    <input class="input" id="new-box-label" placeholder='e.g. "Bedroom", "Kitchen", "Books"' onkeydown="if(event.key==='Enter')createBox()">
+    <div class="field-lbl">Box Number</div>
+    <input class="input" id="new-box-num" type="number" placeholder="Auto-assigned (tap to change)">
+    <div class="field-lbl">Destination Room</div>
+    <div class="sel-row">
+      <select id="new-box-room">
+        <option value="">No room assigned</option>
+        <option>Living Room</option><option>Bedroom</option><option>Kitchen</option>
+        <option>Bathroom</option><option>Office</option><option>Storage</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field-lbl">Priority</div>
+    <div class="sel-row">
+      <select id="new-box-priority">
+        <option value="normal">Normal</option>
+        <option value="first">🔴 Open First</option>
+        <option value="store">📦 Storage Only</option>
+      </select>
+    </div>
+    <button class="btn btn-blue" onclick="createBox()">Create Box</button>
+  </div>
+</div>
+
+<!-- BOX DETAIL -->
+<div class="page" id="page-box">
+  <div class="pg">
+    <!-- Box meta (editable) -->
+    <div class="grouped">
+      <div class="grouped-row">
+        <span class="grouped-row-label">Room</span>
+        <select class="grouped-row-input" id="box-room-select" onchange="saveBoxMeta()">
+          <option value="">None</option>
+          <option>Living Room</option><option>Bedroom</option><option>Kitchen</option>
+          <option>Bathroom</option><option>Office</option><option>Storage</option><option>Other</option>
+        </select>
       </div>
-
-      <div>
-        <div class="section-hdr">
-          <span class="section-title">Your Boxes</span>
-        </div>
-        <div class="box-list" id="box-list">
-          <div class="empty-state"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap below to get started.</p></div>
-        </div>
+      <div class="grouped-row">
+        <span class="grouped-row-label">Priority</span>
+        <select class="grouped-row-input" id="box-priority-select" onchange="saveBoxMeta()">
+          <option value="normal">Normal</option>
+          <option value="first">🔴 Open First</option>
+          <option value="store">📦 Storage Only</option>
+        </select>
       </div>
+      <div class="grouped-row">
+        <span class="grouped-row-label">Box #</span>
+        <input class="grouped-row-input" id="box-num-input" type="number" onchange="saveBoxMeta()">
+      </div>
+    </div>
 
-      <button class="btn btn-accent" onclick="navTo('add-box')">+ New Box</button>
+    <!-- Box photos -->
+    <div class="media-card">
+      <div class="media-label">Box Photos</div>
+      <div class="media-grid media-sm" id="box-photos-grid"></div>
+      <div class="media-empty" id="box-photos-empty">No photos yet</div>
+      <div class="media-btns">
+        <button class="media-btn" onclick="tap('box-cam')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Camera
+        </button>
+        <button class="media-btn" onclick="tap('box-lib')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Library
+        </button>
+        <button class="media-btn" onclick="tap('box-ai-scan')" id="box-scan-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Scan AI
+        </button>
+      </div>
+      <input class="fhidden" type="file" id="box-cam" accept="image/*" capture="environment" onchange="handleBoxPhoto(this)">
+      <input class="fhidden" type="file" id="box-lib" accept="image/*" onchange="handleBoxPhoto(this)">
+      <input class="fhidden" type="file" id="box-ai-scan" accept="image/*" onchange="handleBoxAI(this)">
+    </div>
+
+    <!-- Items -->
+    <div>
+      <div class="sec-hdr"><span class="sec-title">Items in this box</span></div>
+      <div style="height:10px"></div>
+      <div class="group-list" id="group-list"><div class="empty"><div class="empty-icon">🗂</div><p>No items yet.</p></div></div>
+    </div>
+
+    <button class="btn btn-danger" onclick="deleteCurrentBox()">Delete This Box</button>
+  </div>
+
+  <div class="sticky-bar">
+    <div class="bar-row">
+      <input class="bar-input" id="new-group-text" placeholder="Item or group name…" onkeydown="if(event.key==='Enter')addGroup()">
+      <button class="bar-add" onclick="addGroup()">Add</button>
+      <button class="bar-scan" id="box-bar-scan" title="Scan room with AI" onclick="tap('box-ai-scan')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP DETAIL -->
+<div class="page" id="page-group">
+  <div class="pg">
+    <div>
+      <div class="field-lbl">Name</div>
+      <div style="height:6px"></div>
+      <input class="input" id="grp-name" placeholder="Item or group name">
+    </div>
+    <div>
+      <div class="field-lbl">Notes</div>
+      <div style="height:6px"></div>
+      <textarea class="input" id="grp-notes" placeholder="Condition, description, serial number…"></textarea>
+    </div>
+
+    <!-- Group photos -->
+    <div class="media-card">
+      <div class="media-label">Photos</div>
+      <div class="media-grid media-md" id="grp-photos-grid"></div>
+      <div class="media-empty" id="grp-photos-empty">No photos yet</div>
+      <div class="media-btns">
+        <button class="media-btn" onclick="tap('grp-cam')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Camera
+        </button>
+        <button class="media-btn" onclick="tap('grp-lib')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Library
+        </button>
+        <button class="media-btn" onclick="tap('grp-ai-scan')" id="grp-scan-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Scan AI
+        </button>
+      </div>
+      <input class="fhidden" type="file" id="grp-cam" accept="image/*" capture="environment" onchange="handleGrpPhoto(this)">
+      <input class="fhidden" type="file" id="grp-lib" accept="image/*" onchange="handleGrpPhoto(this)">
+      <input class="fhidden" type="file" id="grp-ai-scan" accept="image/*" onchange="handleGrpAI(this)">
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Sub-items -->
+    <div>
+      <div class="sec-hdr"><span class="sec-title">Sub-items</span></div>
+      <div style="height:10px"></div>
+      <div class="sub-list" id="sub-list"><div class="empty" style="padding:20px"><p>No sub-items yet.<br>Add manually or scan with AI.</p></div></div>
     </div>
   </div>
 
-  <!-- ── ADD BOX ── -->
-  <div class="page" id="page-add-box">
-    <div class="page-pad">
-      <div class="field">
-        <label class="field-label">Box Label</label>
-        <input class="input" id="new-box-label" placeholder='e.g. "Kitchen", "Books", "Bedroom"' onkeydown="if(event.key==='Enter')createBox()">
-      </div>
-      <button class="btn btn-accent" onclick="createBox()">Create Box</button>
+  <div class="sticky-bar">
+    <div class="bar-row">
+      <input class="bar-input" id="new-sub-text" placeholder="Sub-item…" onkeydown="if(event.key==='Enter')addSub()">
+      <button class="bar-add" onclick="addSub()">Add</button>
+      <button class="bar-scan" title="Scan with AI" onclick="tap('grp-ai-scan')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </button>
     </div>
+    <button class="btn btn-blue" onclick="saveGroup()">Save Changes</button>
   </div>
+</div>
 
-  <!-- ── BOX DETAIL ── -->
-  <div class="page" id="page-box">
-    <div class="page-pad">
-
-      <!-- Box photos -->
-      <div class="card">
-        <div class="card-pad" style="display:flex;flex-direction:column;gap:10px">
-          <span class="field-label">Box Photos</span>
-          <div class="photo-grid thumb-sm" id="box-photos-grid"></div>
-          <div class="photo-add-btns">
-            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('box-cam')">📷 Camera</button>
-            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('box-lib')">🖼 Library</button>
-          </div>
-        </div>
-        <input class="file-hidden" type="file" id="box-cam" accept="image/*" capture="environment" onchange="handleBoxPhoto(this)">
-        <input class="file-hidden" type="file" id="box-lib" accept="image/*" onchange="handleBoxPhoto(this)">
-      </div>
-
-      <!-- Items -->
-      <div>
-        <div class="section-hdr"><span class="section-title">Items in this box</span></div>
-        <div class="group-list" id="group-list">
-          <div class="empty-state"><div class="empty-icon">🗂️</div><p>No items yet.<br>Add your first item below.</p></div>
-        </div>
-      </div>
-
-      <button class="btn btn-danger-ghost" onclick="deleteCurrentBox()">Delete This Box</button>
-    </div>
-
-    <!-- Sticky add bar — box level -->
-    <div class="sticky-input-bar">
-      <input class="input" id="new-group-text" placeholder="Item or group name…" onkeydown="if(event.key==='Enter')addGroup()">
-      <button class="btn-add" onclick="addGroup()">Add</button>
-      <button class="btn-scan-icon" id="box-ai-btn" title="Scan with AI" onclick="tap('box-ai-input')">✦</button>
-      <input class="file-hidden" type="file" id="box-ai-input" accept="image/*" onchange="handleBoxAIScan(this)">
-    </div>
+<!-- SEARCH -->
+<div class="page" id="page-search">
+  <div class="pg">
+    <input class="input" id="search-input" placeholder="Search boxes, items, sub-items…" oninput="doSearch(this.value)">
+    <div id="search-results"></div>
   </div>
-
-  <!-- ── GROUP DETAIL ── -->
-  <div class="page" id="page-group">
-    <div class="page-pad">
-
-      <!-- Name + notes -->
-      <div class="field">
-        <label class="field-label">Name</label>
-        <input class="input" id="group-name-input" placeholder="Item or group name">
-      </div>
-      <div class="field">
-        <label class="field-label">Notes</label>
-        <textarea class="input" id="group-notes-input" placeholder="Condition, description, serial number…"></textarea>
-      </div>
-
-      <!-- Group photos -->
-      <div class="card">
-        <div class="card-pad" style="display:flex;flex-direction:column;gap:10px">
-          <span class="field-label">Photos</span>
-          <div class="photo-grid thumb-md" id="group-photos-grid"></div>
-          <div class="photo-add-btns">
-            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('grp-cam')">📷 Camera</button>
-            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('grp-lib')">🖼 Library</button>
-          </div>
-        </div>
-        <input class="file-hidden" type="file" id="grp-cam" accept="image/*" capture="environment" onchange="handleGroupPhoto(this)">
-        <input class="file-hidden" type="file" id="grp-lib" accept="image/*" onchange="handleGroupPhoto(this)">
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Sub-items -->
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="section-hdr" style="margin-bottom:0"><span class="section-title">Sub-items</span></div>
-
-        <input class="file-hidden" type="file" id="ai-input" accept="image/*" onchange="handleAIScan(this)">
-        <div class="subitem-list" id="subitem-list"></div>
-      </div>
-    </div>
-
-    <!-- Sticky bar: manual add + AI scan + save -->
-    <div class="sticky-input-bar" style="flex-wrap:wrap;gap:8px">
-      <div style="display:flex;gap:8px;flex:1;min-width:0">
-        <input class="input" id="new-subitem-text" placeholder="Sub-item…" onkeydown="if(event.key==='Enter')addSubitem()" style="flex:1">
-        <button class="btn-add" onclick="addSubitem()">Add</button>
-        <button class="btn-scan-icon" id="grp-ai-btn" title="Scan with AI" onclick="tap('ai-input')">✦</button>
-      </div>
-      <button class="btn btn-accent" style="width:100%;padding:11px" onclick="saveGroup()">Save Changes</button>
-    </div>
-  </div>
-
-  <!-- ── SEARCH ── -->
-  <div class="page" id="page-search">
-    <div class="page-pad">
-      <input class="input" id="search-input" placeholder="Search boxes, items, sub-items…" oninput="doSearch(this.value)">
-      <div id="search-results"></div>
-    </div>
-  </div>
+</div>
 
 </div><!-- /app -->
 
 <!-- AI SHEET -->
 <div id="ai-overlay" onclick="if(event.target===this)closeAI()">
   <div class="ai-sheet">
-    <div class="ai-sheet-handle"></div>
-    <div class="ai-sheet-hdr">
-      <span class="ai-sheet-title">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        AI identified these items
-      </span>
-      <button class="ai-sheet-close" onclick="closeAI()">✕</button>
+    <div class="ai-handle"></div>
+    <div class="ai-hdr">
+      <div>
+        <div class="ai-title" id="ai-sheet-title">AI found these items</div>
+        <div class="ai-subtitle" id="ai-sheet-sub">Tap to deselect anything incorrect</div>
+      </div>
+      <button class="ai-close" onclick="closeAI()">✕</button>
     </div>
-    <p class="ai-sheet-subtext">Tap to deselect anything that looks wrong.</p>
     <div class="ai-items" id="ai-items"></div>
-    <div class="ai-sheet-footer">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeAI()">Cancel</button>
-      <button class="btn btn-accent" style="flex:2" onclick="confirmAI()">Add Selected</button>
+    <div class="ai-footer">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeAI()">Cancel</button>
+      <button class="btn btn-blue btn-sm" style="flex:2" onclick="confirmAI()">Add Selected</button>
     </div>
   </div>
 </div>
 
+<!-- LOADING -->
+<div id="loading-overlay">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">Scanning with AI…</div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
-<div id="lightbox" onclick="closeLightbox()">
-  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
-  <img id="lightbox-img" src="" alt="">
+<div id="lb" onclick="closeLB()">
+  <button id="lb-close" onclick="closeLB()">✕</button>
+  <img id="lb-img" src="" alt="">
 </div>
 
 <!-- TOAST -->
@@ -688,447 +667,433 @@ textarea.input { resize: none; min-height: 84px; line-height: 1.5; }
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwC_KiAtO-WMq6WBj7Zcv9RywBsnVufLDOVn8JjZe7khTZxnf5CurqS8dteyMOgF1AE/exec";
-const LOCAL_KEY  = "boxly-v3";
+const LOCAL_KEY  = "boxly-v4";
+const ROOMS = ['Living Room','Bedroom','Kitchen','Bathroom','Office','Storage','Other'];
+const PRIORITIES = { normal: { label:'Normal', cls:'tag-normal' }, first: { label:'Open First', cls:'tag-first' }, store: { label:'Storage Only', cls:'tag-store' } };
 
 // ── STATE ────────────────────────────────────────────────
-let S = {
-  boxes:         [],
-  activeBoxId:   null,
-  activeGroupId: null,
-  aiItems:       [],
-};
+let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box' };
 let navStack = ['home'];
 
-// ── LOCAL STORAGE ────────────────────────────────────────
-function save()  { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(S.boxes)); } catch {} }
-function load()  { try { const r = localStorage.getItem(LOCAL_KEY); if (r) S.boxes = JSON.parse(r); } catch {} }
-function box()   { return S.boxes.find(b => b.id === S.activeBoxId) || null; }
-function group() { const b = box(); return b ? (b.groups.find(g => g.id === S.activeGroupId) || null) : null; }
+// ── PERSIST ──────────────────────────────────────────────
+function save() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(S.boxes)); } catch {} }
+function load() { try { const r=localStorage.getItem(LOCAL_KEY); if(r) S.boxes=JSON.parse(r); } catch {} }
+function B()    { return S.boxes.find(b=>b.id===S.activeBoxId)||null; }
+function G()    { const b=B(); return b?(b.groups.find(g=>g.id===S.activeGrpId)||null):null; }
 
 // ── SYNC ─────────────────────────────────────────────────
-function syncStatus(state, label) {
-  const pill  = document.getElementById('sync-pill');
-  const lbl   = document.getElementById('sync-label');
-  pill.className = 'sync-pill ' + (state || '');
-  lbl.textContent = label || 'Sync';
+function syncUI(state, lbl) {
+  const p=document.getElementById('sync-pill'), l=document.getElementById('sync-lbl');
+  p.className='sync-pill '+(state||''); l.textContent=lbl||'Sync';
 }
 async function push(payload) {
-  syncStatus('syncing', 'Saving…');
-  try {
-    await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-    syncStatus('synced', 'Saved');
-    setTimeout(() => syncStatus('', 'Sync'), 2500);
-  } catch { syncStatus('error', 'Offline'); }
+  syncUI('syncing','Saving…');
+  try { await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)}); syncUI('synced','Saved'); setTimeout(()=>syncUI('','Sync'),3000); }
+  catch { syncUI('error','Offline'); }
 }
 async function pullSheet() {
-  syncStatus('syncing', 'Loading…');
+  syncUI('syncing','Loading…');
   try {
-    const r    = await fetch(SCRIPT_URL + '?action=getAll');
-    const data = await r.json();
-    if (data.success && data.items && data.items.length && !S.boxes.length) {
-      const map = {};
-      data.items.forEach(row => {
-        const n = parseInt(row.boxNum);
-        if (!map[n]) {
-          let bp = []; try { bp = JSON.parse(row.boxPhotos||'[]'); } catch {}
-          map[n] = { id: n, num: n, label: row.boxLabel, photos: bp, groups: [] };
+    const r=await fetch(SCRIPT_URL+'?action=getAll');
+    const d=await r.json();
+    if(d.success && d.items && d.items.length && !S.boxes.length) {
+      const map={};
+      d.items.forEach(row=>{
+        const n=parseInt(row.boxNum);
+        if(!map[n]){
+          let bp=[]; try{bp=JSON.parse(row.boxPhotos||'[]');}catch{}
+          map[n]={id:n,num:n,label:row.boxLabel,photos:bp,room:row.room||'',priority:row.priority||'normal',groups:[]};
         }
-        if (row.itemId) {
-          let ph = []; try { ph = JSON.parse(row.photoUrls||'[]'); } catch {}
-          let si = []; try { si = JSON.parse(row.subitems||'[]');  } catch {}
-          map[n].groups.push({ id: row.itemId, name: row.itemText, notes: row.notes||'', photos: ph, subitems: si });
+        if(row.itemId){
+          let ph=[]; try{ph=JSON.parse(row.photoUrls||'[]');}catch{}
+          let si=[]; try{si=JSON.parse(row.subitems||'[]');}catch{}
+          map[n].groups.push({id:row.itemId,name:row.itemText,notes:row.notes||'',photos:ph,subitems:si});
         }
       });
-      S.boxes = Object.values(map).sort((a,b) => a.num - b.num);
-      save();
+      S.boxes=Object.values(map).sort((a,b)=>a.num-b.num); save();
     }
-    syncStatus('synced', 'Saved');
-    setTimeout(() => syncStatus('', 'Sync'), 2500);
-  } catch { syncStatus('error', 'Offline'); }
+    syncUI('synced','Saved'); setTimeout(()=>syncUI('','Sync'),3000);
+  } catch { syncUI('error','Offline'); }
   renderHome();
 }
 
-// ── NAVIGATION ───────────────────────────────────────────
+// ── NAV ──────────────────────────────────────────────────
 function navTo(page) { navStack.push(page); render(page); }
-function navBack()   { if (navStack.length > 1) navStack.pop(); render(navStack[navStack.length-1]); }
+function navBack()   { if(navStack.length>1) navStack.pop(); render(navStack[navStack.length-1]); }
 
 function render(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const back=document.getElementById('hdr-back');
+  const title=document.getElementById('hdr-title');
+  const srch=document.getElementById('hdr-search');
+  back.style.display  = navStack.length>1 ? 'flex':'none';
+  srch.style.display  = ['home','box'].includes(page) ? 'flex':'none';
 
-  const back   = document.getElementById('hdr-back');
-  const title  = document.getElementById('hdr-title');
-  const search = document.getElementById('hdr-search');
-
-  back.style.display  = navStack.length > 1 ? 'flex' : 'none';
-  search.style.display = ['home','box'].includes(page) ? 'flex' : 'none';
-
-  if (page === 'home')     { title.textContent = '📦 Boxly'; renderHome(); }
-  if (page === 'add-box')  { title.textContent = 'New Box'; setTimeout(() => document.getElementById('new-box-label').focus(), 80); }
-  if (page === 'box')      { const b = box(); title.textContent = b ? `Box ${b.num}` : 'Box'; renderBox(); setTimeout(() => document.getElementById('new-group-text').focus(), 80); }
-  if (page === 'group')    { const b = box(); title.textContent = b ? `Box ${b.num} — Items` : 'Item'; renderGroup(); }
-  if (page === 'search')   { title.textContent = 'Search'; document.getElementById('search-input').value = ''; document.getElementById('search-results').innerHTML = ''; setTimeout(() => document.getElementById('search-input').focus(), 80); }
+  if(page==='home')    { title.textContent='📦 Boxly'; renderHome(); }
+  if(page==='add-box') {
+    title.textContent='New Box';
+    // Pre-fill next box number
+    const nextNum = S.boxes.length ? Math.max(...S.boxes.map(b=>b.num))+1 : 1;
+    document.getElementById('new-box-num').placeholder = `Auto: ${nextNum}`;
+    document.getElementById('new-box-num').value = '';
+    document.getElementById('new-box-label').value = '';
+    document.getElementById('new-box-room').value = '';
+    document.getElementById('new-box-priority').value = 'normal';
+    setTimeout(()=>document.getElementById('new-box-label').focus(),80);
+  }
+  if(page==='box')     { const b=B(); title.textContent=b?`Box ${b.num} — ${b.label}`:'Box'; renderBox(); }
+  if(page==='group')   { const b=B(); title.textContent=b?b.label:'Item'; renderGroup(); }
+  if(page==='search')  { title.textContent='Search'; document.getElementById('search-input').value=''; document.getElementById('search-results').innerHTML=''; setTimeout(()=>document.getElementById('search-input').focus(),80); }
 }
 
 // ── HOME ─────────────────────────────────────────────────
 function renderHome() {
-  const total = S.boxes.reduce((a,b) => a + b.groups.length, 0);
-  document.getElementById('stat-boxes').textContent = S.boxes.length;
-  document.getElementById('stat-items').textContent = total;
-  const el = document.getElementById('box-list');
-  if (!S.boxes.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap below to get started.</p></div>'; return; }
-  el.innerHTML = S.boxes.slice().sort((a,b) => a.num-b.num).map(b => {
-    const strip = (b.photos||[]).length
-      ? `<div class="box-photo-row">${(b.photos||[]).map(u=>`<img src="${x(u)}" onclick="event.stopPropagation();lb('${x(u)}')" loading="lazy">`).join('')}</div>`
-      : '';
+  const totalItems = S.boxes.reduce((a,b)=>a+b.groups.length,0);
+  const totalSubs  = S.boxes.reduce((a,b)=>a+b.groups.reduce((c,g)=>c+(g.subitems||[]).length,0),0);
+  document.getElementById('s-boxes').textContent    = S.boxes.length;
+  document.getElementById('s-items').textContent    = totalItems;
+  document.getElementById('s-subitems').textContent = totalSubs;
+  const el=document.getElementById('box-list');
+  if(!S.boxes.length){el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap below to get started.</p></div>';return;}
+  el.innerHTML=S.boxes.slice().sort((a,b)=>a.num-b.num).map(b=>{
+    const ph=b.photos||[];
+    const strip=ph.length?`<div class="box-photo-row">${ph.map(u=>`<img src="${x(u)}" onclick="event.stopPropagation();openLB('${x(u)}')" loading="lazy" onerror="this.style.display='none'">`).join('')}</div>`:'';
+    const p=PRIORITIES[b.priority||'normal'];
+    const tags=[
+      b.room?`<span class="tag tag-room">${x(b.room)}</span>`:'',
+      b.priority&&b.priority!=='normal'?`<span class="tag ${p.cls}">${p.label}</span>`:'',
+    ].filter(Boolean).join('');
     return `<button class="box-card" onclick="openBox(${b.id})">
       <div class="box-card-top">
         <div class="box-num-badge">${b.num}</div>
-        <div class="box-card-body">
-          <div class="box-card-name">${x(b.label)}</div>
-          <div class="box-card-meta">${b.groups.length} item${b.groups.length!==1?'s':''}</div>
+        <div class="box-info">
+          <div class="box-name">${x(b.label)}</div>
+          <div class="box-meta">
+            ${b.groups.length} item${b.groups.length!==1?'s':''}
+            ${tags?'<span class="box-tags">'+tags+'</span>':''}
+          </div>
         </div>
-        <span class="box-card-arrow">›</span>
+        <div class="box-arrow"><svg viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>${strip}
     </button>`;
   }).join('');
 }
-
-function openBox(id) { S.activeBoxId = id; navTo('box'); }
+function openBox(id){ S.activeBoxId=id; navTo('box'); }
 
 // ── CREATE BOX ───────────────────────────────────────────
-function createBox() {
-  const label = document.getElementById('new-box-label').value.trim();
-  if (!label) return;
-  const num = S.boxes.length ? Math.max(...S.boxes.map(b=>b.num)) + 1 : 1;
-  const b = { id: Date.now(), num, label, photos: [], groups: [] };
+function createBox(){
+  const label=document.getElementById('new-box-label').value.trim(); if(!label)return;
+  const nextNum=S.boxes.length?Math.max(...S.boxes.map(b=>b.num))+1:1;
+  const numVal=document.getElementById('new-box-num').value;
+  const num=numVal?parseInt(numVal):nextNum;
+  const room=document.getElementById('new-box-room').value;
+  const priority=document.getElementById('new-box-priority').value||'normal';
+  const b={id:Date.now(),num,label,room,priority,photos:[],groups:[]};
   S.boxes.push(b); save();
-  document.getElementById('new-box-label').value = '';
-  S.activeBoxId = b.id;
-  navStack[navStack.length-1] = 'box';
+  S.activeBoxId=b.id;
+  navStack[navStack.length-1]='box';
   render('box');
-  toast(`Box ${num} created ✓`);
-  push({ action:'createBox', boxNum:num, boxLabel:label });
-}
-
-// ── BOX-LEVEL AI SCAN (whole room → creates item groups) ──────────────────
-async function handleBoxAIScan(input) {
-  const file = input.files[0]; if (!file) return;
-  const btn = document.getElementById('box-ai-btn');
-  btn.disabled = true; btn.textContent = '…';
-  try {
-    const b64 = await compress(file, 1600);
-    const b   = box();
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action:'scanWithAI', imageBase64:b64, groupName:'items in this room' })
-    });
-    const data = await res.json();
-    if (!data.success || !data.items || !data.items.length) { toast('No items detected — try a clearer photo'); return; }
-    S.aiItems = data.items.map((name,i) => ({ name, sel:true, id:i }));
-    S.aiMode  = 'box'; // tells confirmAI where to add
-    renderAISheet();
-    document.getElementById('ai-overlay').classList.add('open');
-  } catch(e) { console.error(e); toast('AI scan failed'); }
-  finally { btn.disabled = false; btn.textContent = '✦'; input.value = ''; }
+  toast(`Box ${num} created`);
+  push({action:'createBox',boxNum:num,boxLabel:label,room,priority});
 }
 
 // ── BOX DETAIL ───────────────────────────────────────────
-function renderBox() {
-  const b = box(); if (!b) return;
-  document.getElementById('hdr-title').textContent = `Box ${b.num} — ${b.label}`;
+function renderBox(){
+  const b=B(); if(!b) return;
+  document.getElementById('hdr-title').textContent=`Box ${b.num} — ${b.label}`;
+  document.getElementById('box-room-select').value=b.room||'';
+  document.getElementById('box-priority-select').value=b.priority||'normal';
+  document.getElementById('box-num-input').value=b.num;
+
   // Photos
-  document.getElementById('box-photos-grid').innerHTML = (b.photos||[]).map((u,i) =>
-    `<div class="photo-thumb-wrap thumb-sm"><img src="${x(u)}" onclick="lb('${x(u)}')" loading="lazy"><div class="photo-del" onclick="delBoxPhoto(${i})">✕</div></div>`
-  ).join('');
+  const grid=document.getElementById('box-photos-grid');
+  const empty=document.getElementById('box-photos-empty');
+  const ph=b.photos||[];
+  grid.innerHTML=ph.map((u,i)=>`<div class="media-wrap media-sm"><img src="${x(u)}" onclick="openLB('${x(u)}')" loading="lazy" onerror="this.parentNode.remove()"><div class="media-del" onclick="delBoxPhoto(${i})">✕</div></div>`).join('');
+  empty.style.display=ph.length?'none':'block';
+
   // Groups
-  const el = document.getElementById('group-list');
-  if (!b.groups.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No items yet.</p></div>'; return; }
-  el.innerHTML = b.groups.map(g => {
-    const ph = g.photos||[], si = g.subitems||[];
-    const thumb = ph[0]
-      ? `<img class="group-thumb" src="${x(ph[0])}" loading="lazy">`
-      : `<div class="group-no-thumb">📦</div>`;
-    const meta = [
-      si.length ? `${si.length} sub-item${si.length!==1?'s':''}` : '',
-      ph.length ? `${ph.length} photo${ph.length!==1?'s':''}` : '',
-      g.notes   ? g.notes.substring(0,48)+(g.notes.length>48?'…':'') : ''
-    ].filter(Boolean).join('  ·  ');
+  const el=document.getElementById('group-list');
+  if(!b.groups.length){el.innerHTML='<div class="empty"><div class="empty-icon">🗂</div><p>No items yet.</p></div>';return;}
+  el.innerHTML=b.groups.map(g=>{
+    const ph2=g.photos||[], si=g.subitems||[];
+    const thumb=ph2[0]
+      ? `<img class="group-thumb" src="${x(ph2[0])}" loading="lazy" onerror="this.outerHTML='<div class=\\'group-placeholder\\'><svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><path d=\\'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z\\'/></svg></div>'">`
+      : `<div class="group-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px;color:var(--text3)"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>`;
+    const meta=[si.length?`${si.length} sub-item${si.length!==1?'s':''}`:'',(ph2.length?`${ph2.length} photo${ph2.length!==1?'s':''}`:''),(g.notes?g.notes.substring(0,45)+(g.notes.length>45?'…':''):'')].filter(Boolean).join(' · ');
     return `<div class="group-card">
-      <div class="group-card-row" onclick="openGroup('${x(g.id)}')">
+      <div class="group-row" onclick="openGrp('${x(g.id)}')">
         ${thumb}
         <div class="group-info">
           <div class="group-name">${x(g.name)}</div>
-          ${meta ? `<div class="group-meta">${x(meta)}</div>` : ''}
+          ${meta?`<div class="group-meta">${x(meta)}</div>`:''}
         </div>
-        <span class="group-arrow">›</span>
-        <button class="group-del" onclick="event.stopPropagation();delGroup('${x(g.id)}')">✕</button>
-      </div>
-    </div>`;
+        <div class="group-chevron"><svg viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <button class="group-del" onclick="event.stopPropagation();delGrp('${x(g.id)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div></div>`;
   }).join('');
 }
 
-async function handleBoxPhoto(input) {
-  const file = input.files[0]; if (!file) return;
-  const b = box(); if (!b) return;
-  toast('Uploading…');
-  try {
-    const url = await upload(await compress(file), `box-${b.num}-${Date.now()}.jpg`);
-    if (url) { if(!b.photos) b.photos=[]; b.photos.push(url); save(); renderBox(); renderHome(); toast('Photo added ✓'); }
-  } catch { toast('Upload failed'); }
-  input.value = '';
+function saveBoxMeta(){
+  const b=B(); if(!b) return;
+  b.room=document.getElementById('box-room-select').value;
+  b.priority=document.getElementById('box-priority-select').value;
+  const nv=document.getElementById('box-num-input').value;
+  if(nv) b.num=parseInt(nv);
+  save(); renderHome();
+  push({action:'updateBoxMeta',boxNum:b.num,boxLabel:b.label,room:b.room,priority:b.priority});
 }
-function delBoxPhoto(i) {
-  const b = box(); if (!b) return;
-  b.photos.splice(i,1); save(); renderBox(); renderHome();
-  push({ action:'updateBoxPhotos', boxNum:b.num, boxPhotos:JSON.stringify(b.photos) });
+
+async function handleBoxPhoto(input){
+  const file=input.files[0]; if(!file) return;
+  const b=B(); if(!b) return;
+  showLoading('Uploading photo…');
+  try{
+    const url=await uploadFile(await compress(file),`box-${b.num}-${Date.now()}.jpg`);
+    if(url){if(!b.photos)b.photos=[];b.photos.push(url);save();renderBox();renderHome();toast('Photo added');}
+    else toast('Upload failed — check Drive permissions');
+  }catch(e){console.error(e);toast('Upload error: '+e.message);}
+  finally{hideLoading();}
+  input.value='';
 }
-function addGroup() {
-  const name = document.getElementById('new-group-text').value.trim(); if (!name) return;
-  const b = box(); if (!b) return;
-  const g = { id: Date.now().toString(), name, notes:'', photos:[], subitems:[] };
-  b.groups.push(g); save(); renderBox(); renderHome();
-  document.getElementById('new-group-text').value = '';
-  toast('Item added ✓');
-  push({ action:'addItem', boxNum:b.num, boxLabel:b.label, itemId:g.id, itemText:name, notes:'', photoUrls:'[]', subitems:'[]' });
+function delBoxPhoto(i){const b=B();if(!b)return;b.photos.splice(i,1);save();renderBox();renderHome();push({action:'updateBoxPhotos',boxNum:b.num,boxPhotos:JSON.stringify(b.photos)});}
+function addGroup(){
+  const name=document.getElementById('new-group-text').value.trim();if(!name)return;
+  const b=B();if(!b)return;
+  const g={id:Date.now().toString(),name,notes:'',photos:[],subitems:[]};
+  b.groups.push(g);save();renderBox();renderHome();
+  document.getElementById('new-group-text').value='';
+  toast('Item added');
+  push({action:'addItem',boxNum:b.num,boxLabel:b.label,itemId:g.id,itemText:name,notes:'',photoUrls:'[]',subitems:'[]',room:b.room||'',priority:b.priority||'normal'});
 }
-function delGroup(id) {
-  const b = box(); if (!b) return;
-  if (!confirm('Remove this item?')) return;
-  b.groups = b.groups.filter(g => g.id !== id); save(); renderBox(); renderHome();
-  push({ action:'deleteItem', itemId:id });
+function delGrp(id){const b=B();if(!b)return;if(!confirm('Remove this item?'))return;b.groups=b.groups.filter(g=>g.id!==id);save();renderBox();renderHome();push({action:'deleteItem',itemId:id});}
+function deleteCurrentBox(){
+  const b=B();if(!b)return;
+  if(!confirm(`Delete Box ${b.num} — ${b.label}?\nThis cannot be undone.`))return;
+  S.boxes=S.boxes.filter(bx=>bx.id!==S.activeBoxId);S.activeBoxId=null;save();renderHome();
+  navStack=['home'];render('home');push({action:'deleteBox',boxNum:b.num});toast('Box deleted');
 }
-function deleteCurrentBox() {
-  const b = box(); if (!b) return;
-  if (!confirm(`Delete Box ${b.num} — ${b.label}? This cannot be undone.`)) return;
-  S.boxes = S.boxes.filter(bx => bx.id !== S.activeBoxId);
-  S.activeBoxId = null; save(); renderHome();
-  navStack = ['home']; render('home');
-  push({ action:'deleteBox', boxNum:b.num });
-  toast('Box deleted');
+
+// ── BOX AI SCAN ──────────────────────────────────────────
+async function handleBoxAI(input){
+  const file=input.files[0];if(!file)return;
+  showLoading('Scanning room with AI…');
+  try{
+    const b64=await compress(file,1600);
+    const b=B();
+    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:'items visible in this space'})});
+    const data=await res.json();
+    if(!data.success||!data.items||!data.items.length){toast('No items detected — try a clearer photo');return;}
+    S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
+    S.aiMode='box';
+    document.getElementById('ai-sheet-title').textContent=`AI found ${data.items.length} items`;
+    document.getElementById('ai-sheet-sub').textContent='Tap to deselect anything incorrect';
+    renderAISheet();
+    document.getElementById('ai-overlay').classList.add('open');
+  }catch(e){console.error(e);toast('AI scan failed: '+e.message);}
+  finally{hideLoading();input.value='';}
 }
 
 // ── GROUP DETAIL ─────────────────────────────────────────
-function openGroup(id) { S.activeGroupId = id; navTo('group'); }
-function renderGroup() {
-  const g = group(); if (!g) return;
-  document.getElementById('group-name-input').value  = g.name;
-  document.getElementById('group-notes-input').value = g.notes||'';
-  document.getElementById('group-photos-grid').innerHTML = (g.photos||[]).map((u,i) =>
-    `<div class="photo-thumb-wrap thumb-md"><img src="${x(u)}" onclick="lb('${x(u)}')" loading="lazy"><div class="photo-del" onclick="delGroupPhoto(${i})">✕</div></div>`
-  ).join('');
-  renderSubitems();
+function openGrp(id){S.activeGrpId=id;navTo('group');}
+function renderGroup(){
+  const g=G();if(!g)return;
+  // Pre-populate name — this was the bug
+  document.getElementById('grp-name').value=g.name;
+  document.getElementById('grp-notes').value=g.notes||'';
+  const grid=document.getElementById('grp-photos-grid');
+  const empty=document.getElementById('grp-photos-empty');
+  const ph=g.photos||[];
+  grid.innerHTML=ph.map((u,i)=>`<div class="media-wrap media-md"><img src="${x(u)}" onclick="openLB('${x(u)}')" loading="lazy" onerror="this.parentNode.remove()"><div class="media-del" onclick="delGrpPhoto(${i})">✕</div></div>`).join('');
+  empty.style.display=ph.length?'none':'block';
+  renderSubs();
 }
-async function handleGroupPhoto(input) {
-  const file = input.files[0]; if (!file) return;
-  const g = group(); if (!g) return;
-  toast('Uploading…');
-  try {
-    const url = await upload(await compress(file), `grp-${g.id}-${Date.now()}.jpg`);
-    if (url) { if(!g.photos) g.photos=[]; g.photos.push(url); save(); renderGroup(); toast('Photo added ✓'); }
-  } catch { toast('Upload failed'); }
-  input.value = '';
+async function handleGrpPhoto(input){
+  const file=input.files[0];if(!file)return;
+  const g=G();if(!g)return;
+  showLoading('Uploading photo…');
+  try{
+    const url=await uploadFile(await compress(file),`grp-${g.id}-${Date.now()}.jpg`);
+    if(url){if(!g.photos)g.photos=[];g.photos.push(url);save();renderGroup();toast('Photo added');}
+    else toast('Upload failed — check Drive permissions');
+  }catch(e){console.error(e);toast('Upload error: '+e.message);}
+  finally{hideLoading();}
+  input.value='';
 }
-function delGroupPhoto(i) { const g = group(); if (!g) return; g.photos.splice(i,1); save(); renderGroup(); }
+function delGrpPhoto(i){const g=G();if(!g)return;g.photos.splice(i,1);save();renderGroup();}
+function saveGroup(){
+  const g=G();if(!g)return;const b=B();
+  g.name=document.getElementById('grp-name').value.trim()||g.name;
+  g.notes=document.getElementById('grp-notes').value.trim();
+  save();renderHome();
+  push({action:'updateItem',itemId:g.id,itemText:g.name,notes:g.notes,photoUrls:JSON.stringify(g.photos||[]),subitems:JSON.stringify(g.subitems||[]),boxNum:b?b.num:0,boxLabel:b?b.label:''});
+  toast('Saved');navBack();
+}
 
-function saveGroup() {
-  const g = group(); if (!g) return;
-  const b = box();
-  g.name  = document.getElementById('group-name-input').value.trim()  || g.name;
-  g.notes = document.getElementById('group-notes-input').value.trim();
-  save(); renderHome();
-  push({ action:'updateItem', itemId:g.id, itemText:g.name, notes:g.notes, photoUrls:JSON.stringify(g.photos||[]), subitems:JSON.stringify(g.subitems||[]), boxNum:b?b.num:0, boxLabel:b?b.label:'' });
-  toast('Saved ✓');
-  navBack();
-}
-
-// ── AI SCAN ──────────────────────────────────────────────
-async function handleAIScan(input) {
-  const file = input.files[0]; if (!file) return;
-  const btn = document.getElementById('ai-scan-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="ai-spinner"></div> Scanning with AI…';
-  try {
-    const b64 = await compress(file, 1600);
-    const g   = group();
-    S.aiMode  = 'group';
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action:'scanWithAI', imageBase64:b64, groupName: g ? g.name : 'items' })
-    });
-    const data = await res.json();
-    if (!data.success || !data.items || !data.items.length) { toast('No items detected — try a clearer photo'); return; }
-    S.aiItems = data.items.map((name,i) => ({ name, sel:true, id:i }));
+// ── GROUP AI SCAN ─────────────────────────────────────────
+async function handleGrpAI(input){
+  const file=input.files[0];if(!file)return;
+  const g=G();
+  showLoading(`Scanning "${g?g.name:'items'}" with AI…`);
+  try{
+    const b64=await compress(file,1600);
+    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:g?g.name:'items'})});
+    const data=await res.json();
+    if(!data.success||!data.items||!data.items.length){toast('No items detected — try a clearer photo');return;}
+    S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
+    S.aiMode='group';
+    document.getElementById('ai-sheet-title').textContent=`AI found ${data.items.length} sub-items`;
+    document.getElementById('ai-sheet-sub').textContent='Tap to deselect anything incorrect';
     renderAISheet();
     document.getElementById('ai-overlay').classList.add('open');
-  } catch(e) {
-    console.error(e);
-    toast('AI scan failed — check connection');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Scan with AI — Photo to Items';
-    input.value = '';
-  }
+  }catch(e){console.error(e);toast('AI scan failed: '+e.message);}
+  finally{hideLoading();input.value='';}
 }
-function renderAISheet() {
-  document.getElementById('ai-items').innerHTML = S.aiItems.map((item,i) =>
-    `<div class="ai-item ${item.sel?'selected':''}" onclick="toggleAI(${i})">
-      <div class="ai-check">${item.sel?'✓':''}</div>
-      <span class="ai-item-name">${x(item.name)}</span>
-    </div>`
-  ).join('');
-}
-function toggleAI(i) {
-  S.aiItems[i].sel = !S.aiItems[i].sel;
-  const el = document.getElementById('ai-items').children[i];
-  el.classList.toggle('selected', S.aiItems[i].sel);
-  el.querySelector('.ai-check').textContent = S.aiItems[i].sel ? '✓' : '';
-}
-function confirmAI() {
-  const sel = S.aiItems.filter(i => i.sel);
-  if (!sel.length) { toast('Nothing selected'); return; }
 
-  if (S.aiMode === 'box') {
-    // Add as top-level item groups in the box
-    const b = box(); if (!b) return;
-    sel.forEach(item => {
-      const g = { id: Date.now().toString()+Math.random(), name:item.name, notes:'', photos:[], subitems:[] };
-      b.groups.push(g);
-      push({ action:'addItem', boxNum:b.num, boxLabel:b.label, itemId:g.id, itemText:item.name, notes:'', photoUrls:'[]', subitems:'[]' });
-    });
-    save(); renderBox(); renderHome();
-    toast(`${sel.length} item${sel.length!==1?'s':''} added to box ✓`);
-  } else {
-    // Add as sub-items inside a group
-    const g = group(); if (!g) return;
-    sel.forEach(item => g.subitems.push({ id: Date.now().toString()+Math.random(), name:item.name, photos:[] }));
-    save(); renderSubitems();
-    toast(`${sel.length} sub-item${sel.length!==1?'s':''} added ✓`);
-  }
-  closeAI();
-}
-function closeAI() { document.getElementById('ai-overlay').classList.remove('open'); S.aiItems = []; }
-
-// ── SUB-ITEMS ────────────────────────────────────────────
-function renderSubitems() {
-  const g = group(); if (!g) return;
-  const el = document.getElementById('subitem-list');
-  if (!(g.subitems||[]).length) {
-    el.innerHTML = '<div class="empty-state" style="padding:16px 0"><p>No sub-items yet.<br>Scan with AI or add manually.</p></div>';
-    return;
-  }
-  el.innerHTML = g.subitems.map(si => {
-    const ph = si.photos||[];
-    const photosHtml = ph.map((u,pi) =>
-      `<div class="subitem-photo-wrap"><img src="${x(u)}" onclick="lb('${x(u)}')" loading="lazy"><div class="subitem-photo-del" onclick="delSIPhoto('${x(si.id)}',${pi})">✕</div></div>`
-    ).join('');
-    return `<div class="subitem-card">
-      <div class="subitem-row">
-        <span class="subitem-icon">—</span>
-        <span class="subitem-name">${x(si.name)}</span>
-        ${ph.length ? `<span class="subitem-photo-badge">📷 ${ph.length}</span>` : ''}
-        <button class="subitem-expand" onclick="toggleSI('${x(si.id)}')">⌄</button>
-        <button class="subitem-del"    onclick="delSI('${x(si.id)}')">✕</button>
+// ── SUB-ITEMS ─────────────────────────────────────────────
+function renderSubs(){
+  const g=G();if(!g)return;
+  const el=document.getElementById('sub-list');
+  if(!(g.subitems||[]).length){el.innerHTML='<div class="empty" style="padding:20px"><p>No sub-items yet.<br>Add manually or scan with AI.</p></div>';return;}
+  el.innerHTML=g.subitems.map(si=>{
+    const ph=si.photos||[];
+    const phHtml=ph.map((u,pi)=>`<div class="sub-photo-wrap"><img src="${x(u)}" onclick="openLB('${x(u)}')" loading="lazy" onerror="this.parentNode.remove()"><div class="sub-photo-del" onclick="delSIPhoto('${x(si.id)}',${pi})">✕</div></div>`).join('');
+    return `<div class="sub-card">
+      <div class="sub-row">
+        <div class="sub-dot"></div>
+        <span class="sub-name">${x(si.name)}</span>
+        ${ph.length?`<span class="sub-badge">📷 ${ph.length}</span>`:''}
+        <button class="sub-expand" onclick="toggleSI('${x(si.id)}')">⌄</button>
+        <button class="sub-del" onclick="delSI('${x(si.id)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="subitem-body hidden" id="sib-${x(si.id)}">
-        ${ph.length ? `<div class="subitem-photos">${photosHtml}</div>` : ''}
-        <div class="photo-add-btns">
-          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('sic-${x(si.id)}')">📷 Camera</button>
-          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('sil-${x(si.id)}')">🖼 Library</button>
+      <div class="sub-body hidden" id="sib-${x(si.id)}">
+        ${ph.length?`<div class="sub-photos">${phHtml}</div>`:''}
+        <div class="media-btns">
+          <button class="media-btn" onclick="tap('sic-${x(si.id)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Camera</button>
+          <button class="media-btn" onclick="tap('sil-${x(si.id)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Library</button>
         </div>
-        <input class="file-hidden" type="file" id="sic-${x(si.id)}" accept="image/*" capture="environment" onchange="handleSIPhoto(this,'${x(si.id)}')">
-        <input class="file-hidden" type="file" id="sil-${x(si.id)}" accept="image/*" onchange="handleSIPhoto(this,'${x(si.id)}')">
+        <input class="fhidden" type="file" id="sic-${x(si.id)}" accept="image/*" capture="environment" onchange="handleSIPhoto(this,'${x(si.id)}')">
+        <input class="fhidden" type="file" id="sil-${x(si.id)}" accept="image/*" onchange="handleSIPhoto(this,'${x(si.id)}')">
       </div>
     </div>`;
   }).join('');
 }
-function toggleSI(id) {
-  const b = document.getElementById('sib-'+id); if (!b) return;
-  const hidden = b.classList.toggle('hidden');
-  b.previousElementSibling.querySelector('.subitem-expand').textContent = hidden ? '⌄' : '⌃';
+function toggleSI(id){const b=document.getElementById('sib-'+id);if(!b)return;const h=b.classList.toggle('hidden');b.previousElementSibling.querySelector('.sub-expand').textContent=h?'⌄':'⌃';}
+function addSub(){const name=document.getElementById('new-sub-text').value.trim();if(!name)return;const g=G();if(!g)return;if(!g.subitems)g.subitems=[];g.subitems.push({id:Date.now().toString(),name,photos:[]});save();renderSubs();document.getElementById('new-sub-text').value='';}
+function delSI(id){const g=G();if(!g)return;g.subitems=g.subitems.filter(s=>s.id!==id);save();renderSubs();}
+async function handleSIPhoto(input,id){
+  const file=input.files[0];if(!file)return;
+  const g=G();if(!g)return;const si=g.subitems.find(s=>s.id===id);if(!si)return;
+  showLoading('Uploading photo…');
+  try{const url=await uploadFile(await compress(file),`si-${id}-${Date.now()}.jpg`);if(url){if(!si.photos)si.photos=[];si.photos.push(url);save();renderSubs();toast('Photo added');}else toast('Upload failed');}
+  catch(e){toast('Upload error');}
+  finally{hideLoading();}
+  input.value='';
 }
-function addSubitem() {
-  const name = document.getElementById('new-subitem-text').value.trim(); if (!name) return;
-  const g = group(); if (!g) return;
-  if (!g.subitems) g.subitems = [];
-  g.subitems.push({ id: Date.now().toString(), name, photos:[] });
-  save(); renderSubitems();
-  document.getElementById('new-subitem-text').value = '';
+function delSIPhoto(id,pi){const g=G();if(!g)return;const si=g.subitems.find(s=>s.id===id);if(!si)return;si.photos.splice(pi,1);save();renderSubs();}
+
+// ── AI SHEET ─────────────────────────────────────────────
+function renderAISheet(){
+  document.getElementById('ai-items').innerHTML=S.aiItems.map((item,i)=>
+    `<div class="ai-item ${item.sel?'sel':''}" onclick="toggleAI(${i})">
+      <div class="ai-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></div>
+      <span class="ai-name">${x(item.name)}</span>
+    </div>`
+  ).join('');
 }
-function delSI(id) { const g = group(); if (!g) return; g.subitems = g.subitems.filter(s=>s.id!==id); save(); renderSubitems(); }
-async function handleSIPhoto(input, id) {
-  const file = input.files[0]; if (!file) return;
-  const g = group(); if (!g) return;
-  const si = g.subitems.find(s=>s.id===id); if (!si) return;
-  toast('Uploading…');
-  try {
-    const url = await upload(await compress(file), `si-${id}-${Date.now()}.jpg`);
-    if (url) { if(!si.photos) si.photos=[]; si.photos.push(url); save(); renderSubitems(); toast('Photo added ✓'); }
-  } catch { toast('Upload failed'); }
-  input.value = '';
+function toggleAI(i){
+  S.aiItems[i].sel=!S.aiItems[i].sel;
+  const el=document.getElementById('ai-items').children[i];
+  el.classList.toggle('sel',S.aiItems[i].sel);
 }
-function delSIPhoto(id,pi) { const g=group();if(!g)return;const si=g.subitems.find(s=>s.id===id);if(!si)return;si.photos.splice(pi,1);save();renderSubitems(); }
+function confirmAI(){
+  const sel=S.aiItems.filter(i=>i.sel);
+  if(!sel.length){toast('Nothing selected');return;}
+  if(S.aiMode==='box'){
+    const b=B();if(!b)return;
+    sel.forEach(item=>{
+      const g={id:Date.now().toString()+Math.random(),name:item.name,notes:'',photos:[],subitems:[]};
+      b.groups.push(g);
+      push({action:'addItem',boxNum:b.num,boxLabel:b.label,itemId:g.id,itemText:item.name,notes:'',photoUrls:'[]',subitems:'[]'});
+    });
+    save();renderBox();renderHome();
+    toast(`${sel.length} item${sel.length!==1?'s':''} added`);
+  } else {
+    const g=G();if(!g)return;
+    sel.forEach(item=>g.subitems.push({id:Date.now().toString()+Math.random(),name:item.name,photos:[]}));
+    save();renderSubs();
+    toast(`${sel.length} sub-item${sel.length!==1?'s':''} added`);
+  }
+  closeAI();
+}
+function closeAI(){document.getElementById('ai-overlay').classList.remove('open');S.aiItems=[];}
 
 // ── SEARCH ───────────────────────────────────────────────
-function doSearch(q) {
-  const el = document.getElementById('search-results');
-  q = q.trim().toLowerCase();
-  if (!q) { el.innerHTML = ''; return; }
-  const bHits=[], gHits=[], sHits=[];
-  S.boxes.forEach(b => {
-    if (b.label.toLowerCase().includes(q)) bHits.push(b);
-    (b.groups||[]).forEach(g => {
-      if (g.name.toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)) gHits.push({b,g});
-      (g.subitems||[]).forEach(si => { if(si.name.toLowerCase().includes(q)) sHits.push({b,g,si}); });
+function doSearch(q){
+  const el=document.getElementById('search-results');
+  q=q.trim().toLowerCase();
+  if(!q){el.innerHTML='';return;}
+  const bH=[],gH=[],sH=[];
+  S.boxes.forEach(b=>{
+    if(b.label.toLowerCase().includes(q)||(b.room||'').toLowerCase().includes(q)) bH.push(b);
+    (b.groups||[]).forEach(g=>{
+      if(g.name.toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)) gH.push({b,g});
+      (g.subitems||[]).forEach(si=>{if(si.name.toLowerCase().includes(q))sH.push({b,g,si});});
     });
   });
-  if (!bHits.length&&!gHits.length&&!sHits.length) { el.innerHTML=`<div class="empty-state"><p>Nothing found for "<strong>${x(q)}</strong>"</p></div>`; return; }
+  if(!bH.length&&!gH.length&&!sH.length){el.innerHTML='<div class="empty"><p>Nothing found.</p></div>';return;}
   let html='';
-  const sec = (t,m) => `<div class="section-title" style="margin:${m} 0 10px">${t}</div>`;
-  if (bHits.length) { html+=sec('Boxes','0'); html+=bHits.map(b=>`<button class="search-hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span><span class="hit-text">${x(b.label)}</span><span class="hit-sub">${b.groups.length} items</span></button>`).join(''); }
-  if (gHits.length) { html+=sec('Items',bHits.length?'16px':'0'); html+=gHits.map(({b,g})=>{const t=g.photos&&g.photos[0]?`<img class="hit-thumb" src="${x(g.photos[0])}" loading="lazy">`:'';return`<button class="search-hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span>${t}<span class="hit-text">${x(g.name)}</span><span class="hit-sub">${x(b.label)}</span></button>`;}).join(''); }
-  if (sHits.length) { html+=sec('Sub-items',(bHits.length||gHits.length)?'16px':'0'); html+=sHits.map(({b,g,si})=>{const t=si.photos&&si.photos[0]?`<img class="hit-thumb" src="${x(si.photos[0])}" loading="lazy">`:'';return`<button class="search-hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span>${t}<span class="hit-text">${x(si.name)}</span><span class="hit-sub">${x(g.name)}</span></button>`;}).join(''); }
-  el.innerHTML = html;
+  const sec=t=>`<div class="sec-title" style="padding:4px;margin-bottom:8px">${t}</div>`;
+  if(bH.length){html+=sec('Boxes');html+=bH.map(b=>`<button class="hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span><span class="hit-text">${x(b.label)}</span>${b.room?`<span class="hit-sub">${x(b.room)}</span>`:''}</button>`).join('');}
+  if(gH.length){html+=sec('Items');html+=gH.map(({b,g})=>{const t=g.photos&&g.photos[0]?`<img class="hit-thumb" src="${x(g.photos[0])}" loading="lazy" onerror="this.style.display='none'">`:'';return`<button class="hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span>${t}<span class="hit-text">${x(g.name)}</span><span class="hit-sub">${x(b.label)}</span></button>`;}).join('');}
+  if(sH.length){html+=sec('Sub-items');html+=sH.map(({b,g,si})=>{const t=si.photos&&si.photos[0]?`<img class="hit-thumb" src="${x(si.photos[0])}" loading="lazy" onerror="this.style.display='none'">`:'';return`<button class="hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span>${t}<span class="hit-text">${x(si.name)}</span><span class="hit-sub">${x(g.name)}</span></button>`;}).join('');}
+  el.innerHTML=html;
 }
 
-// ── PHOTO UTILS ──────────────────────────────────────────
-function compress(file, maxPx=1200) {
-  return new Promise((res,rej) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        let w=img.width, h=img.height;
-        if (w>h&&w>maxPx){h=h*maxPx/w;w=maxPx;} else if(h>maxPx){w=w*maxPx/h;h=maxPx;}
-        const c = document.createElement('canvas'); c.width=w; c.height=h;
+// ── LOADING ──────────────────────────────────────────────
+function showLoading(msg){const o=document.getElementById('loading-overlay');document.getElementById('loading-text').textContent=msg||'Loading…';o.classList.add('show');}
+function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
+
+// ── PHOTO UPLOAD ──────────────────────────────────────────
+// Fix: use thumbnail URL format that actually renders in img tags
+async function uploadFile(b64, name) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action:'uploadPhoto', imageBase64:b64, fileName:name })
+  });
+  const d = await res.json();
+  if (!d.success) throw new Error(d.error || 'Upload failed');
+  return d.url;
+}
+
+function compress(file, maxPx=1200){
+  return new Promise((res,rej)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        if(w>h&&w>maxPx){h=h*maxPx/w;w=maxPx;}else if(h>maxPx){w=w*maxPx/h;h=maxPx;}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
         c.getContext('2d').drawImage(img,0,0,w,h);
         res(c.toDataURL('image/jpeg',0.82).split(',')[1]);
       };
-      img.onerror=rej; img.src=e.target.result;
+      img.onerror=rej;img.src=e.target.result;
     };
-    reader.onerror=rej; reader.readAsDataURL(file);
+    reader.onerror=rej;reader.readAsDataURL(file);
   });
 }
-async function upload(b64, name) {
-  const r = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'uploadPhoto', imageBase64:b64, fileName:name }) });
-  const d = await r.json(); return d.success ? d.url : null;
-}
 
-// ── HELPERS ──────────────────────────────────────────────
-function tap(id)   { document.getElementById(id).click(); }
-function lb(src)   { document.getElementById('lightbox-img').src=src; document.getElementById('lightbox').classList.add('open'); }
-function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-function x(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2000);
-}
+// ── UTILS ────────────────────────────────────────────────
+function tap(id){document.getElementById(id).click();}
+function openLB(src){document.getElementById('lb-img').src=src;document.getElementById('lb').classList.add('open');}
+function closeLB(){document.getElementById('lb').classList.remove('open');}
+function x(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 
 // ── BOOT ─────────────────────────────────────────────────
-load();
-renderHome();
-pullSheet();
+load(); renderHome(); pullSheet();
 </script>
 </body>
 </html>
