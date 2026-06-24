@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Boxly">
+<title>Boxly</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0c0c0c; --surface: #161616; --border: #242424;
+    --text: #f0ede8; --muted: #555; --accent: #d4b896;
+    --danger: #c0504d; --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; min-height: -webkit-fill-available; overscroll-behavior: none; }
+  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+  .header { display: flex; align-items: center; padding: calc(var(--safe-top) + 14px) 20px 14px; background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; gap: 12px; min-height: 56px; }
+  .header-title { flex: 1; font-size: 16px; font-weight: 600; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .icon-btn { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; }
+  .icon-btn:active { background: var(--surface); }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s; flex-shrink: 0; }
+  .sync-dot.syncing { background: #f0a500; animation: pulse 1s infinite; }
+  .sync-dot.synced { background: #4caf50; }
+  .sync-dot.error { background: var(--danger); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .page { display: none; flex: 1; padding: 20px 20px calc(var(--safe-bottom) + 32px); flex-direction: column; gap: 16px; overflow-y: auto; }
+  .page.active { display: flex; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .stat-num { font-size: 32px; font-weight: 700; color: var(--accent); letter-spacing: -1px; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  .box-list { display: flex; flex-direction: column; gap: 8px; }
+  .box-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; text-align: left; color: var(--text); width: 100%; }
+  .box-card:active { background: #1e1e1e; }
+  .box-num { font-size: 12px; font-weight: 700; color: var(--accent); min-width: 42px; font-variant-numeric: tabular-nums; }
+  .box-label { flex: 1; font-size: 15px; font-weight: 500; }
+  .box-meta { font-size: 12px; color: var(--muted); }
+  .chevron { color: var(--muted); font-size: 14px; }
+  .btn-primary { width: 100%; padding: 15px; background: var(--accent); color: #0c0c0c; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 700; cursor: pointer; }
+  .btn-primary:active { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.4; }
+  .input { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px; font-size: 15px; color: var(--text); width: 100%; outline: none; -webkit-appearance: none; }
+  .input:focus { border-color: var(--accent); }
+  .input::placeholder { color: var(--muted); }
+  .input-row { display: flex; gap: 8px; }
+  .input-row .input { flex: 1; }
+  .item-list { display: flex; flex-direction: column; gap: 8px; }
+  .item-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .item-text { flex: 1; font-size: 15px; line-height: 1.3; }
+  .item-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; cursor: pointer; border: 1px solid var(--border); }
+  .item-del { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0; }
+  .item-del:active { color: var(--danger); }
+  .photo-area { display: flex; gap: 8px; align-items: center; }
+  .photo-preview { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border); display: none; }
+  .photo-preview.visible { display: block; }
+  .photo-btns { display: flex; gap: 6px; }
+  .btn-photo { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-photo:active { background: #1e1e1e; }
+  #photo-input, #camera-input { display: none; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 0; }
+  .btn-danger { width: 100%; padding: 13px; background: none; border: 1px solid #2a1a1a; border-radius: var(--radius); color: var(--danger); font-size: 14px; cursor: pointer; margin-top: 8px; }
+  .search-result { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; text-align: left; color: var(--text); width: 100%; }
+  .search-result:active { background: #1e1e1e; }
+  .result-badge { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 48px; }
+  .result-text { flex: 1; font-size: 15px; }
+  .result-sub { font-size: 12px; color: var(--muted); }
+  .result-thumb { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); }
+  #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; align-items: center; justify-content: center; }
+  #lightbox.open { display: flex; }
+  #lightbox img { max-width: 94vw; max-height: 86vh; border-radius: 10px; object-fit: contain; }
+  #lightbox-close { position: absolute; top: calc(var(--safe-top) + 16px); right: 20px; background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; }
+  #toast { position: fixed; bottom: calc(var(--safe-bottom) + 24px); left: 50%; transform: translateX(-50%) translateY(20px); background: #222; color: var(--text); padding: 10px 18px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.25s; z-index: 200; white-space: nowrap; border: 1px solid var(--border); }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .hint { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .divider { height: 1px; background: var(--border); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <button class="icon-btn" id="back-btn" style="display:none" onclick="goBack()">←</button>
+    <span class="header-title" id="header-title">📦 Boxly</span>
+    <div class="sync-dot" id="sync-dot"></div>
+    <button class="icon-btn" id="search-icon" onclick="showPage('search')">🔍</button>
+  </div>
+  <div class="page active" id="page-home">
+    <div class="stats">
+      <div class="stat-card"><span class="stat-num" id="stat-boxes">0</span><span class="stat-label">Boxes</span></div>
+      <div class="stat-card"><span class="stat-num" id="stat-items">0</span><span class="stat-label">Items</span></div>
+    </div>
+    <div class="box-list" id="box-list"><div class="empty">No boxes yet.<br>Add your first one below.</div></div>
+    <button class="btn-primary" onclick="showPage('add-box')">+ New Box</button>
+  </div>
+  <div class="page" id="page-add-box">
+    <p class="hint">Give this box a short label — e.g. "Kitchen", "Books", "Cables & Tech"</p>
+    <input class="input" id="new-box-label" placeholder="Box label..." onkeydown="if(event.key==='Enter')createBox()">
+    <button class="btn-primary" onclick="createBox()">Create Box</button>
+  </div>
+  <div class="page" id="page-box">
+    <div class="input-row">
+      <input class="input" id="new-item-text" placeholder="Add item..." onkeydown="if(event.key==='Enter')addItem()">
+      <button class="btn-primary" style="width:auto;padding:13px 18px" onclick="addItem()">Add</button>
+    </div>
+    <div class="photo-area">
+      <img class="photo-preview" id="photo-preview" onclick="openLightbox(this.src)">
+      <div class="photo-btns">
+        <button class="btn-photo" onclick="document.getElementById('camera-input').click()">📷 Camera</button>
+        <button class="btn-photo" onclick="document.getElementById('photo-input').click()">🖼 Library</button>
+      </div>
+      <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handlePhoto(this)">
+      <input type="file" id="photo-input" accept="image/*" onchange="handlePhoto(this)">
+    </div>
+    <div class="divider"></div>
+    <div class="item-list" id="item-list"><div class="empty">No items yet.</div></div>
+    <button class="btn-danger" onclick="deleteCurrentBox()">Delete This Box</button>
+  </div>
+  <div class="page" id="page-search">
+    <input class="input" id="search-input" placeholder="Search items or box names..." oninput="doSearch(this.value)">
+    <div id="search-results"></div>
+  </div>
+</div>
+<div id="lightbox" onclick="closeLightbox()">
+  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="">
+</div>
+<div id="toast"></div>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwC_KiAtO-WMq6WBj7Zcv9RywBsnVufLDOVn8JjZe7khTZxnf5CurqS8dteyMOgF1AE/exec";
+const STORAGE_KEY = "boxly-v1";
+let state = { boxes: [], activeBoxId: null, prevPage: null };
+
+function saveLocal() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.boxes)); } catch {} }
+function loadLocal() { try { const r = localStorage.getItem(STORAGE_KEY); if (r) state.boxes = JSON.parse(r); } catch {} }
+
+function setSyncStatus(s) { document.getElementById('sync-dot').className = 'sync-dot ' + s; }
+
+async function syncPost(payload) {
+  setSyncStatus('syncing');
+  try {
+    await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+    setSyncStatus('synced');
+    setTimeout(() => setSyncStatus(''), 3000);
+  } catch { setSyncStatus('error'); toast('Sync failed — saved locally'); }
+}
+
+async function loadFromSheet() {
+  setSyncStatus('syncing');
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getAll');
+    const data = await res.json();
+    if (data.success && data.items && data.items.length > 0) {
+      const boxMap = {};
+      data.items.forEach(row => {
+        const num = parseInt(row.boxNum);
+        if (!boxMap[num]) boxMap[num] = { id: num, num, label: row.boxLabel, items: [] };
+        if (row.itemId) boxMap[num].items.push({ id: row.itemId, text: row.itemText, photoUrl: row.photoUrl || '' });
+      });
+      state.boxes = Object.values(boxMap).sort((a,b) => a.num - b.num);
+      saveLocal();
+    }
+    setSyncStatus('synced');
+    setTimeout(() => setSyncStatus(''), 3000);
+  } catch { setSyncStatus('error'); }
+  renderHome();
+}
+
+function showPage(name, prev) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  state.prevPage = prev || 'home';
+  const back = document.getElementById('back-btn');
+  const si = document.getElementById('search-icon');
+  const title = document.getElementById('header-title');
+  if (name === 'home') { back.style.display='none'; si.style.display=''; title.textContent='📦 Boxly'; }
+  else if (name === 'add-box') { back.style.display=''; si.style.display='none'; title.textContent='New Box'; setTimeout(()=>document.getElementById('new-box-label').focus(),100); }
+  else if (name === 'box') { back.style.display=''; si.style.display=''; const b=getActiveBox(); title.textContent=b?`Box ${b.num} — ${b.label}`:'Box'; renderBoxDetail(); setTimeout(()=>document.getElementById('new-item-text').focus(),100); }
+  else if (name === 'search') { back.style.display=''; si.style.display='none'; title.textContent='Search'; document.getElementById('search-input').value=''; document.getElementById('search-results').innerHTML=''; setTimeout(()=>document.getElementById('search-input').focus(),100); }
+}
+function goBack() { showPage(state.prevPage || 'home'); }
+function getActiveBox() { return state.boxes.find(b => b.id === state.activeBoxId); }
+function toast(msg) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
+function nextBoxNum() { return state.boxes.length ? Math.max(...state.boxes.map(b=>b.num))+1 : 1; }
+
+function renderHome() {
+  document.getElementById('stat-boxes').textContent = state.boxes.length;
+  document.getElementById('stat-items').textContent = state.boxes.reduce((a,b)=>a+b.items.length,0);
+  const list = document.getElementById('box-list');
+  if (!state.boxes.length) { list.innerHTML='<div class="empty">No boxes yet.<br>Add your first one below.</div>'; return; }
+  list.innerHTML = state.boxes.slice().sort((a,b)=>a.num-b.num).map(b=>`
+    <button class="box-card" onclick="openBox(${b.id})">
+      <span class="box-num">#${b.num}</span>
+      <span class="box-label">${esc(b.label)}</span>
+      <span class="box-meta">${b.items.length} item${b.items.length!==1?'s':''}</span>
+      <span class="chevron">›</span>
+    </button>`).join('');
+}
+function openBox(id) { state.activeBoxId=id; showPage('box','home'); }
+
+function createBox() {
+  const label = document.getElementById('new-box-label').value.trim();
+  if (!label) return;
+  const num = nextBoxNum();
+  const box = { id: Date.now(), num, label, items: [] };
+  state.boxes.push(box);
+  saveLocal(); renderHome();
+  document.getElementById('new-box-label').value = '';
+  state.activeBoxId = box.id;
+  showPage('box','home');
+  toast(`Box ${num} created`);
+  syncPost({ action:'createBox', boxNum:num, boxLabel:label });
+}
+
+let pendingPhotoBase64=null, pendingPhotoName=null;
+
+function renderBoxDetail() {
+  const box = getActiveBox(); if (!box) return;
+  const preview = document.getElementById('photo-preview');
+  preview.classList.remove('visible'); pendingPhotoBase64=null; pendingPhotoName=null;
+  const list = document.getElementById('item-list');
+  if (!box.items.length) { list.innerHTML='<div class="empty">No items yet.</div>'; return; }
+  list.innerHTML = box.items.map(item=>`
+    <div class="item-card">
+      ${item.photoUrl?`<img class="item-thumb" src="${item.photoUrl}" onclick="openLightbox('${item.photoUrl}')" loading="lazy">`:''}
+      <span class="item-text">${esc(item.text)}</span>
+      <button class="item-del" onclick="deleteItem('${item.id}')">✕</button>
+    </div>`).join('');
+}
+
+async function addItem() {
+  const text = document.getElementById('new-item-text').value.trim();
+  if (!text) return;
+  const box = getActiveBox(); if (!box) return;
+  const itemId = Date.now().toString();
+  let photoUrl = '';
+  const btn = document.querySelector('#page-box .btn-primary');
+  btn.disabled=true; btn.textContent='…';
+  if (pendingPhotoBase64) {
+    toast('Uploading photo…');
+    try {
+      const res = await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'uploadPhoto',imageBase64:pendingPhotoBase64,fileName:pendingPhotoName||`item-${itemId}.jpg`})});
+      const d = await res.json();
+      if (d.success) photoUrl = d.url;
+    } catch { toast('Photo upload failed'); }
+  }
+  box.items.push({id:itemId,text,photoUrl});
+  saveLocal(); renderBoxDetail(); renderHome();
+  document.getElementById('new-item-text').value='';
+  document.getElementById('new-item-text').focus();
+  btn.disabled=false; btn.textContent='Add';
+  toast('Item added');
+  syncPost({action:'addItem',boxNum:box.num,boxLabel:box.label,itemId,itemText:text,photoUrl});
+}
+
+function deleteItem(itemId) {
+  const box=getActiveBox(); if(!box) return;
+  if(!confirm('Remove this item?')) return;
+  box.items=box.items.filter(i=>i.id!==itemId);
+  saveLocal(); renderBoxDetail(); renderHome();
+  syncPost({action:'deleteItem',itemId});
+}
+
+function deleteCurrentBox() {
+  const box=getActiveBox(); if(!box) return;
+  if(!confirm(`Delete Box ${box.num} — ${box.label}?`)) return;
+  state.boxes=state.boxes.filter(b=>b.id!==state.activeBoxId);
+  state.activeBoxId=null;
+  saveLocal(); renderHome(); showPage('home');
+  syncPost({action:'deleteBox',boxNum:box.num});
+  toast('Box deleted');
+}
+
+function handlePhoto(input) {
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      const MAX=800; let w=img.width,h=img.height;
+      if(w>h&&w>MAX){h=h*MAX/w;w=MAX;}else if(h>MAX){w=w*MAX/h;h=MAX;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const compressed=canvas.toDataURL('image/jpeg',0.72);
+      pendingPhotoBase64=compressed.split(',')[1];
+      pendingPhotoName=`item-${Date.now()}.jpg`;
+      const preview=document.getElementById('photo-preview');
+      preview.src=compressed; preview.classList.add('visible');
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file); input.value='';
+}
+
+function doSearch(q) {
+  const container=document.getElementById('search-results');
+  q=q.trim().toLowerCase();
+  if(!q){container.innerHTML='';return;}
+  const itemHits=[],boxHits=[];
+  state.boxes.forEach(b=>{
+    if(b.label.toLowerCase().includes(q)) boxHits.push(b);
+    b.items.forEach(item=>{if(item.text.toLowerCase().includes(q))itemHits.push({box:b,item});});
+  });
+  if(!itemHits.length&&!boxHits.length){container.innerHTML=`<div class="empty">Nothing found for "${esc(q)}"</div>`;return;}
+  let html='';
+  if(boxHits.length){
+    html+=`<div class="section-label" style="margin-bottom:10px">Boxes</div>`;
+    html+=boxHits.map(b=>`<button class="search-result" onclick="openBox(${b.id})" style="margin-bottom:8px"><span class="result-badge">Box ${b.num}</span><span class="result-text">${esc(b.label)}</span><span class="result-sub">${b.items.length} items</span></button>`).join('');
+  }
+  if(itemHits.length){
+    html+=`<div class="section-label" style="margin:${boxHits.length?'16px':0} 0 10px">Items</div>`;
+    html+=itemHits.map(({box,item})=>`<button class="search-result" onclick="openBox(${box.id})" style="margin-bottom:8px"><span class="result-badge">Box ${box.num}</span>${item.photoUrl?`<img class="result-thumb" src="${item.photoUrl}" loading="lazy">`:''}<span class="result-text">${esc(item.text)}</span><span class="result-sub">${esc(box.label)}</span></button>`).join('');
+  }
+  container.innerHTML=html;
+}
+
+function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+loadLocal(); renderHome(); loadFromSheet();
+</script>
+</body>
+</html>
