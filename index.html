@@ -8,508 +8,876 @@
 <meta name="apple-mobile-web-app-title" content="Boxly">
 <title>Boxly</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --bg: #0c0c0c; --surface: #161616; --surface2: #1e1e1e; --border: #242424;
-    --text: #f0ede8; --muted: #555; --accent: #d4b896;
-    --danger: #c0504d; --radius: 14px;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  html, body { width: 100%; overflow-x: hidden; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overscroll-behavior: none; }
-  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+/* ── RESET & TOKENS ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  .header { display: flex; align-items: center; padding: calc(var(--safe-top) + 14px) 20px 14px; background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; gap: 12px; min-height: 56px; }
-  .header-title { flex: 1; font-size: 16px; font-weight: 600; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .icon-btn { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; }
-  .icon-btn:active { background: var(--surface); }
-  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s; flex-shrink: 0; }
-  .sync-dot.syncing { background: #f0a500; animation: pulse 1s infinite; }
-  .sync-dot.synced { background: #4caf50; }
-  .sync-dot.error { background: var(--danger); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+:root {
+  /* Palette */
+  --c-bg:        #0a0a0a;
+  --c-s1:        #141414;
+  --c-s2:        #1c1c1c;
+  --c-s3:        #242424;
+  --c-border:    #2a2a2a;
+  --c-text:      #f2efe9;
+  --c-text2:     #8a8a8a;
+  --c-text3:     #555;
+  --c-accent:    #c9a97a;
+  --c-accent-bg: rgba(201,169,122,0.08);
+  --c-danger:    #e05252;
+  --c-ai:        #7c6aff;
+  --c-ai-bg:     rgba(124,106,255,0.10);
+  --c-ai-border: rgba(124,106,255,0.30);
+  --c-green:     #4ade80;
 
-  .page { display: none; flex: 1; padding: 20px 20px calc(var(--safe-bottom) + 32px); flex-direction: column; gap: 16px; overflow-y: auto; overflow-x: hidden; }
-  .page.active { display: flex; }
+  /* Radius */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
 
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .stat-num { font-size: 32px; font-weight: 700; color: var(--accent); letter-spacing: -1px; }
-  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  /* Safe areas */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
 
-  .box-list { display: flex; flex-direction: column; gap: 8px; }
-  .box-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; width: 100%; text-align: left; color: var(--text); cursor: pointer; }
-  .box-card:active { opacity: 0.8; }
-  .box-card-main { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
-  .box-num { font-size: 12px; font-weight: 700; color: var(--accent); min-width: 42px; }
-  .box-label-text { flex: 1; font-size: 15px; font-weight: 500; }
-  .box-meta { font-size: 12px; color: var(--muted); }
-  .chevron { color: var(--muted); font-size: 14px; }
-  .box-photo-strip { display: flex; gap: 6px; padding: 0 16px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .box-photo-strip img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; cursor: pointer; }
+  /* Transitions */
+  --t-fast: 140ms ease;
+}
 
-  .btn-primary { width: 100%; padding: 15px; background: var(--accent); color: #0c0c0c; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 700; cursor: pointer; }
-  .btn-primary:active { opacity: 0.85; }
-  .btn-primary:disabled { opacity: 0.4; }
-  .btn-secondary { width: 100%; padding: 13px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; }
-  .btn-secondary:active { background: var(--surface2); }
-  .btn-danger { width: 100%; padding: 13px; background: none; border: 1px solid #2a1a1a; border-radius: var(--radius); color: var(--danger); font-size: 14px; cursor: pointer; }
+html, body { width: 100%; overflow-x: hidden; height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  background: var(--c-bg);
+  color: var(--c-text);
+  min-height: 100vh;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
 
-  .btn-ai { width: 100%; padding: 13px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%); color: #a78bfa; border: 1px solid #3730a3; border-radius: var(--radius); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-ai:active { opacity: 0.8; }
-  .btn-ai:disabled { opacity: 0.4; }
-  .ai-spinner { width: 16px; height: 16px; border: 2px solid #3730a3; border-top-color: #a78bfa; border-radius: 50%; animation: spin 0.7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+#app { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
 
-  #ai-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; align-items: flex-end; justify-content: center; }
-  #ai-overlay.open { display: flex; }
-  .ai-sheet { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 80vh; display: flex; flex-direction: column; padding-bottom: calc(var(--safe-bottom) + 16px); }
-  .ai-sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
-  .ai-sheet-header { padding: 16px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-  .ai-sheet-title { font-size: 15px; font-weight: 700; color: var(--accent); }
-  .ai-sheet-close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; }
-  .ai-sheet-body { flex: 1; overflow-y: auto; padding: 14px 20px; display: flex; flex-direction: column; gap: 8px; }
-  .ai-item-row { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; cursor: pointer; }
-  .ai-check { width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-  .ai-check.checked { background: var(--accent); border-color: var(--accent); color: #0c0c0c; }
-  .ai-item-name { flex: 1; font-size: 14px; line-height: 1.3; }
-  .ai-sheet-footer { padding: 12px 20px 0; display: flex; gap: 8px; }
+/* ── HEADER ─────────────────────────────────────────── */
+.hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(var(--sat) + 12px) 16px 12px;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--c-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  min-height: 52px;
+}
+.hdr-back {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--c-accent);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 8px 6px 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.hdr-back svg { width: 9px; height: 15px; }
+.hdr-title {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hdr-action {
+  background: none;
+  border: none;
+  color: var(--c-text2);
+  font-size: 20px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  transition: background var(--t-fast);
+}
+.hdr-action:active { background: var(--c-s2); }
 
-  .input { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px; font-size: 16px; color: var(--text); width: 100%; outline: none; -webkit-appearance: none; font-family: inherit; }
-  .input:focus { border-color: var(--accent); }
-  .input::placeholder { color: var(--muted); }
-  .input-row { display: flex; gap: 8px; }
-  .input-row .input { flex: 1; }
-  textarea.input { resize: none; min-height: 80px; line-height: 1.5; }
+/* Sync indicator */
+.sync-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  background: var(--c-s2);
+  color: var(--c-text3);
+  border: 1px solid var(--c-border);
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c-text3); transition: all 0.3s; }
+.sync-pill.syncing { color: #f59e0b; border-color: rgba(245,158,11,0.3); }
+.sync-pill.syncing .sync-dot { background: #f59e0b; animation: pulse 1s infinite; }
+.sync-pill.synced { color: var(--c-green); border-color: rgba(74,222,128,0.3); }
+.sync-pill.synced .sync-dot { background: var(--c-green); }
+.sync-pill.error { color: var(--c-danger); border-color: rgba(224,82,82,0.3); }
+.sync-pill.error .sync-dot { background: var(--c-danger); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  .photo-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-  .photo-section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .photo-grid { display: flex; gap: 8px; flex-wrap: wrap; }
-  .photo-wrap { position: relative; }
-  .photo-wrap img { border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: block; }
-  .photo-wrap .del-dot { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); border: 2px solid var(--bg); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 700; }
-  .photo-sm img { width: 64px; height: 64px; }
-  .photo-md img { width: 80px; height: 80px; }
-  .photo-btns { display: flex; gap: 8px; }
-  .btn-photo { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 8px; font-size: 13px; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-  .btn-photo:active { opacity: 0.7; }
-  .photo-input-hidden { display: none; }
+/* ── PAGES ──────────────────────────────────────────── */
+.page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; }
+.page.active { display: block; }
+.page-pad { padding: 20px 16px calc(var(--sab) + 40px); display: flex; flex-direction: column; gap: 20px; }
 
-  .group-list { display: flex; flex-direction: column; gap: 8px; }
-  .group-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .group-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 14px; cursor: pointer; }
-  .group-card-header:active { background: var(--surface2); }
-  .group-card-name { flex: 1; font-size: 15px; font-weight: 500; min-width: 0; }
-  .group-card-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .group-card-thumb { width: 40px; height: 40px; border-radius: 7px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
-  .group-del-btn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0; }
-  .group-del-btn:active { color: var(--danger); }
+/* ── HOME PAGE ──────────────────────────────────────── */
+.home-hero {
+  background: linear-gradient(135deg, var(--c-s1) 0%, #1a160e 100%);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  overflow: hidden;
+  position: relative;
+}
+.home-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(201,169,122,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-stat { padding: 4px 16px 4px 0; }
+.hero-stat + .hero-stat { padding-left: 16px; border-left: 1px solid var(--c-border); }
+.hero-num { font-size: 40px; font-weight: 700; color: var(--c-accent); letter-spacing: -2px; line-height: 1; }
+.hero-label { font-size: 11px; color: var(--c-text3); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; font-weight: 600; }
 
-  .field-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.section-title { font-size: 12px; font-weight: 700; color: var(--c-text3); text-transform: uppercase; letter-spacing: 0.8px; }
 
-  .subitem-list { display: flex; flex-direction: column; gap: 8px; }
-  .subitem-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .subitem-header { display: flex; align-items: center; gap: 10px; padding: 11px 12px; }
-  .subitem-name { flex: 1; font-size: 14px; font-weight: 500; }
-  .subitem-photo-count { font-size: 12px; color: var(--muted); }
-  .subitem-expand-btn { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 2px 6px; }
-  .subitem-del-btn { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 2px 6px; }
-  .subitem-del-btn:active { color: var(--danger); }
-  .subitem-body { border-top: 1px solid var(--border); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-  .subitem-body.hidden { display: none; }
-  .subitem-photos { display: flex; gap: 6px; flex-wrap: wrap; }
-  .subitem-photo-wrap { position: relative; }
-  .subitem-photo-wrap img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: block; }
-  .subitem-photo-wrap .del-dot { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; border-radius: 50%; background: var(--danger); border: 2px solid var(--bg); color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-  .subitem-add-photo-btns { display: flex; gap: 6px; }
-  .btn-photo-sm { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 12px; color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 4px; }
+/* Box cards */
+.box-list { display: flex; flex-direction: column; gap: 10px; }
+.box-card {
+  background: var(--c-s1);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color var(--t-fast);
+  text-align: left;
+  width: 100%;
+  color: var(--c-text);
+}
+.box-card:active { border-color: var(--c-accent); background: var(--c-s2); }
+.box-card-top { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.box-num-badge {
+  width: 36px; height: 36px;
+  background: var(--c-accent-bg);
+  border: 1px solid rgba(201,169,122,0.2);
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800;
+  color: var(--c-accent);
+  flex-shrink: 0;
+}
+.box-card-body { flex: 1; min-width: 0; }
+.box-card-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+.box-card-meta { font-size: 12px; color: var(--c-text2); margin-top: 2px; }
+.box-card-arrow { color: var(--c-text3); font-size: 18px; }
+.box-photo-row { display: flex; gap: 6px; padding: 0 16px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.box-photo-row::-webkit-scrollbar { display: none; }
+.box-photo-row img { width: 52px; height: 52px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); flex-shrink: 0; cursor: pointer; }
 
-  .section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
-  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 32px 0; }
-  .hint { font-size: 13px; color: var(--muted); line-height: 1.5; }
-  .divider { height: 1px; background: var(--border); }
-  .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0 0; border-top: 1px solid var(--border); }
+/* ── BUTTONS ────────────────────────────────────────── */
+.btn {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: var(--r-md);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: -0.2px;
+  transition: opacity var(--t-fast);
+}
+.btn:active { opacity: 0.75; }
+.btn:disabled { opacity: 0.35; pointer-events: none; }
+.btn-accent { background: var(--c-accent); color: #0a0a0a; }
+.btn-ghost { background: var(--c-s2); color: var(--c-text); border: 1px solid var(--c-border); }
+.btn-danger-ghost { background: none; color: var(--c-danger); border: 1px solid rgba(224,82,82,0.25); }
+.btn-ai {
+  background: var(--c-ai-bg);
+  color: var(--c-ai);
+  border: 1px solid var(--c-ai-border);
+  font-size: 14px;
+  font-weight: 700;
+}
+.btn-sm { padding: 9px 14px; font-size: 13px; border-radius: var(--r-sm); }
+.btn-inline { width: auto; padding: 12px 18px; }
 
-  .search-result { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; text-align: left; color: var(--text); width: 100%; margin-bottom: 8px; }
-  .search-result:active { background: var(--surface2); }
-  .result-badge { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 48px; flex-shrink: 0; }
-  .result-text { flex: 1; font-size: 15px; min-width: 0; }
-  .result-sub { font-size: 12px; color: var(--muted); flex-shrink: 0; }
-  .result-thumb { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+.ai-spinner { width: 15px; height: 15px; border: 2px solid var(--c-ai-border); border-top-color: var(--c-ai); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
-  #lightbox.open { display: flex; }
-  #lightbox img { max-width: 96vw; max-height: 88vh; border-radius: 10px; object-fit: contain; }
-  #lightbox-close { position: absolute; top: calc(var(--safe-top) + 16px); right: 20px; background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 20px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+/* ── INPUTS ─────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 11px; font-weight: 700; color: var(--c-text3); text-transform: uppercase; letter-spacing: 0.6px; }
+.input {
+  background: var(--c-s1);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: 13px 14px;
+  font-size: 16px;
+  color: var(--c-text);
+  width: 100%;
+  outline: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  transition: border-color var(--t-fast);
+}
+.input:focus { border-color: rgba(201,169,122,0.5); }
+.input::placeholder { color: var(--c-text3); }
+textarea.input { resize: none; min-height: 84px; line-height: 1.5; }
+.input-row { display: flex; gap: 8px; }
+.input-row .input { flex: 1; }
+.file-hidden { display: none; }
 
-  #toast { position: fixed; bottom: calc(var(--safe-bottom) + 24px); left: 50%; transform: translateX(-50%) translateY(20px); background: #222; color: var(--text); padding: 10px 18px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.25s; z-index: 200; white-space: nowrap; border: 1px solid var(--border); pointer-events: none; }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ── CARD SHELL ─────────────────────────────────────── */
+.card {
+  background: var(--c-s1);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.card-pad { padding: 14px 16px; }
+
+/* ── PHOTO GRID ─────────────────────────────────────── */
+.photo-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.photo-thumb-wrap { position: relative; }
+.photo-thumb-wrap img { border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); display: block; cursor: pointer; }
+.thumb-sm img { width: 64px; height: 64px; }
+.thumb-md img { width: 80px; height: 80px; }
+.photo-del {
+  position: absolute; top: -5px; right: -5px;
+  width: 20px; height: 20px;
+  background: var(--c-danger);
+  border: 2px solid var(--c-bg);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.photo-add-btns { display: flex; gap: 8px; margin-top: 2px; }
+
+/* ── GROUP CARDS ────────────────────────────────────── */
+.group-list { display: flex; flex-direction: column; gap: 8px; }
+.group-card {
+  background: var(--c-s1);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.group-card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  cursor: pointer;
+}
+.group-card-row:active { background: var(--c-s2); }
+.group-thumb { width: 42px; height: 42px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); flex-shrink: 0; }
+.group-no-thumb {
+  width: 42px; height: 42px;
+  border-radius: var(--r-sm);
+  background: var(--c-s2);
+  border: 1px solid var(--c-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.group-info { flex: 1; min-width: 0; }
+.group-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+.group-meta { font-size: 12px; color: var(--c-text2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.group-arrow { color: var(--c-text3); font-size: 18px; flex-shrink: 0; }
+.group-del { background: none; border: none; color: var(--c-text3); font-size: 18px; cursor: pointer; padding: 4px 2px; flex-shrink: 0; }
+.group-del:active { color: var(--c-danger); }
+
+/* ── SUB-ITEMS ──────────────────────────────────────── */
+.subitem-list { display: flex; flex-direction: column; gap: 6px; }
+.subitem-card {
+  background: var(--c-s2);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.subitem-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; }
+.subitem-icon { font-size: 13px; color: var(--c-text3); flex-shrink: 0; }
+.subitem-name { flex: 1; font-size: 14px; font-weight: 500; }
+.subitem-photo-badge { font-size: 11px; color: var(--c-text3); background: var(--c-s3); border-radius: 20px; padding: 2px 7px; flex-shrink: 0; }
+.subitem-expand { background: none; border: none; color: var(--c-text3); font-size: 15px; cursor: pointer; padding: 3px 6px; }
+.subitem-del { background: none; border: none; color: var(--c-text3); font-size: 15px; cursor: pointer; padding: 3px 6px; }
+.subitem-del:active { color: var(--c-danger); }
+.subitem-body { border-top: 1px solid var(--c-border); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.subitem-body.hidden { display: none; }
+.subitem-photos { display: flex; gap: 6px; flex-wrap: wrap; }
+.subitem-photo-wrap { position: relative; }
+.subitem-photo-wrap img { width: 60px; height: 60px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); cursor: pointer; display: block; }
+.subitem-photo-del { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: var(--c-danger); border: 2px solid var(--c-bg); border-radius: 50%; color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* ── DIVIDER ────────────────────────────────────────── */
+.divider { height: 1px; background: var(--c-border); }
+
+/* ── EMPTY STATE ────────────────────────────────────── */
+.empty-state { text-align: center; padding: 32px 20px; color: var(--c-text3); }
+.empty-state .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.5; }
+.empty-state p { font-size: 14px; line-height: 1.5; }
+
+/* ── STICKY SAVE ────────────────────────────────────── */
+.sticky-footer {
+  position: sticky;
+  bottom: 0;
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--c-border);
+  padding: 12px 16px calc(var(--sab) + 12px);
+}
+
+/* ── AI BOTTOM SHEET ────────────────────────────────── */
+#ai-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+#ai-overlay.open { display: flex; }
+.ai-sheet {
+  background: var(--c-s1);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  width: 100%;
+  max-width: 430px;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(var(--sab) + 8px);
+}
+.ai-sheet-handle { width: 32px; height: 4px; background: var(--c-border); border-radius: 2px; margin: 10px auto; }
+.ai-sheet-hdr { padding: 4px 16px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--c-border); }
+.ai-sheet-title { font-size: 15px; font-weight: 700; color: var(--c-ai); display: flex; align-items: center; gap: 6px; }
+.ai-sheet-close { background: none; border: none; color: var(--c-text3); font-size: 22px; cursor: pointer; padding: 4px; }
+.ai-sheet-subtext { font-size: 12px; color: var(--c-text3); padding: 8px 16px 0; }
+.ai-items { flex: 1; overflow-y: auto; padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; }
+.ai-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--c-s2);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  cursor: pointer;
+  transition: border-color var(--t-fast);
+}
+.ai-item.selected { border-color: rgba(124,106,255,0.4); background: var(--c-ai-bg); }
+.ai-check {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid var(--c-border);
+  background: var(--c-s1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: all var(--t-fast);
+}
+.ai-item.selected .ai-check { background: var(--c-ai); border-color: var(--c-ai); color: #fff; }
+.ai-item-name { flex: 1; font-size: 14px; line-height: 1.3; }
+.ai-sheet-footer { padding: 10px 16px 0; display: flex; gap: 8px; }
+
+/* ── SEARCH RESULTS ─────────────────────────────────── */
+.search-hit {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--c-s1);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  text-align: left;
+  color: var(--c-text);
+  width: 100%;
+}
+.search-hit:active { background: var(--c-s2); }
+.hit-badge { font-size: 11px; font-weight: 700; color: var(--c-accent); min-width: 50px; flex-shrink: 0; }
+.hit-thumb { width: 34px; height: 34px; border-radius: var(--r-sm); object-fit: cover; border: 1px solid var(--c-border); flex-shrink: 0; }
+.hit-text { flex: 1; font-size: 14px; min-width: 0; }
+.hit-sub { font-size: 12px; color: var(--c-text3); flex-shrink: 0; }
+
+/* ── LIGHTBOX ───────────────────────────────────────── */
+#lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 300; align-items: center; justify-content: center; }
+#lightbox.open { display: flex; }
+#lightbox img { max-width: 96vw; max-height: 90vh; border-radius: var(--r-md); object-fit: contain; }
+#lightbox-close { position: absolute; top: calc(var(--sat) + 16px); right: 16px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 18px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+/* ── TOAST ──────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: calc(var(--sab) + 28px);
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--c-s2);
+  color: var(--c-text);
+  padding: 9px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 400;
+  white-space: nowrap;
+  border: 1px solid var(--c-border);
+  pointer-events: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 <div id="app">
-  <div class="header">
-    <button class="icon-btn" id="back-btn" style="display:none" onclick="navBack()">‹ Back</button>
-    <span class="header-title" id="header-title">📦 Boxly</span>
-    <div class="sync-dot" id="sync-dot"></div>
-    <button class="icon-btn" id="search-icon-btn" onclick="navTo('search')">🔍</button>
-  </div>
 
-  <!-- HOME -->
+  <!-- HEADER -->
+  <header class="hdr">
+    <button class="hdr-back" id="hdr-back" onclick="navBack()">
+      <svg viewBox="0 0 9 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1L1.5 7.5L8 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </button>
+    <span class="hdr-title" id="hdr-title">📦 Boxly</span>
+    <div class="sync-pill" id="sync-pill"><div class="sync-dot"></div><span id="sync-label">Sync</span></div>
+    <button class="hdr-action" id="hdr-search" onclick="navTo('search')" title="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+  </header>
+
+  <!-- ── HOME ── -->
   <div class="page active" id="page-home">
-    <div class="stats">
-      <div class="stat-card"><span class="stat-num" id="stat-boxes">0</span><span class="stat-label">Boxes</span></div>
-      <div class="stat-card"><span class="stat-num" id="stat-items">0</span><span class="stat-label">Items</span></div>
+    <div class="page-pad">
+      <div class="home-hero">
+        <div class="hero-stat">
+          <div class="hero-num" id="stat-boxes">0</div>
+          <div class="hero-label">Boxes</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-num" id="stat-items">0</div>
+          <div class="hero-label">Items</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-hdr">
+          <span class="section-title">Your Boxes</span>
+        </div>
+        <div class="box-list" id="box-list">
+          <div class="empty-state"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap below to get started.</p></div>
+        </div>
+      </div>
+
+      <button class="btn btn-accent" onclick="navTo('add-box')">+ New Box</button>
     </div>
-    <div class="box-list" id="box-list"><div class="empty">No boxes yet.</div></div>
-    <button class="btn-primary" onclick="navTo('add-box')">+ New Box</button>
   </div>
 
-  <!-- ADD BOX -->
+  <!-- ── ADD BOX ── -->
   <div class="page" id="page-add-box">
-    <p class="hint">Give this box a short label — e.g. "Kitchen", "Books", "Action Figures"</p>
-    <input class="input" id="new-box-label" placeholder="Box label..." onkeydown="if(event.key==='Enter')createBox()">
-    <button class="btn-primary" onclick="createBox()">Create Box</button>
+    <div class="page-pad">
+      <div class="field">
+        <label class="field-label">Box Label</label>
+        <input class="input" id="new-box-label" placeholder='e.g. "Kitchen", "Books", "Bedroom"' onkeydown="if(event.key==='Enter')createBox()">
+      </div>
+      <button class="btn btn-accent" onclick="createBox()">Create Box</button>
+    </div>
   </div>
 
-  <!-- BOX DETAIL -->
+  <!-- ── BOX DETAIL ── -->
   <div class="page" id="page-box">
-    <div class="photo-section">
-      <span class="photo-section-label">Box Photos</span>
-      <div class="photo-grid photo-sm" id="box-photos-grid"></div>
-      <div class="photo-btns">
-        <button class="btn-photo" onclick="triggerInput('box-cam')">📷 Camera</button>
-        <button class="btn-photo" onclick="triggerInput('box-lib')">🖼 Library</button>
+    <div class="page-pad">
+
+      <!-- Box photos -->
+      <div class="card">
+        <div class="card-pad" style="display:flex;flex-direction:column;gap:10px">
+          <span class="field-label">Box Photos</span>
+          <div class="photo-grid thumb-sm" id="box-photos-grid"></div>
+          <div class="photo-add-btns">
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('box-cam')">📷 Camera</button>
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('box-lib')">🖼 Library</button>
+          </div>
+        </div>
+        <input class="file-hidden" type="file" id="box-cam" accept="image/*" capture="environment" onchange="handleBoxPhoto(this)">
+        <input class="file-hidden" type="file" id="box-lib" accept="image/*" onchange="handleBoxPhoto(this)">
       </div>
-      <input class="photo-input-hidden" type="file" id="box-cam" accept="image/*" capture="environment" onchange="handleBoxPhoto(this)">
-      <input class="photo-input-hidden" type="file" id="box-lib" accept="image/*" onchange="handleBoxPhoto(this)">
+
+      <!-- Items -->
+      <div>
+        <div class="section-hdr"><span class="section-title">Items in this box</span></div>
+        <div class="group-list" id="group-list">
+          <div class="empty-state"><div class="empty-icon">🗂️</div><p>No items yet.<br>Add your first item below.</p></div>
+        </div>
+      </div>
+
+      <!-- Add item -->
+      <div class="card card-pad" style="display:flex;flex-direction:column;gap:10px">
+        <div class="input-row">
+          <input class="input" id="new-group-text" placeholder='Item or group name, e.g. "Books"' onkeydown="if(event.key==='Enter')addGroup()">
+          <button class="btn btn-accent btn-inline" onclick="addGroup()">Add</button>
+        </div>
+      </div>
+
+      <button class="btn btn-danger-ghost" onclick="deleteCurrentBox()">Delete This Box</button>
     </div>
-    <div class="divider"></div>
-    <div class="input-row">
-      <input class="input" id="new-group-text" placeholder='Add item or group, e.g. "Books"...' onkeydown="if(event.key==='Enter')addGroup()">
-      <button class="btn-primary" style="width:auto;padding:13px 18px" onclick="addGroup()">Add</button>
-    </div>
-    <div class="group-list" id="group-list"><div class="empty">No items yet.</div></div>
-    <button class="btn-danger" onclick="deleteCurrentBox()">Delete This Box</button>
   </div>
 
-  <!-- GROUP DETAIL -->
+  <!-- ── GROUP DETAIL ── -->
   <div class="page" id="page-group">
-    <div>
-      <div class="field-label">Name</div>
-      <input class="input" id="group-name-input" placeholder="Group name...">
-    </div>
-    <div>
-      <div class="field-label">Notes</div>
-      <textarea class="input" id="group-notes-input" placeholder="Add notes, description, condition..."></textarea>
-    </div>
-    <div class="photo-section">
-      <span class="photo-section-label">Photos</span>
-      <div class="photo-grid photo-md" id="group-photos-grid"></div>
-      <div class="photo-btns">
-        <button class="btn-photo" onclick="triggerInput('group-cam')">📷 Camera</button>
-        <button class="btn-photo" onclick="triggerInput('group-lib')">🖼 Library</button>
+    <div class="page-pad">
+
+      <!-- Name + notes -->
+      <div class="field">
+        <label class="field-label">Name</label>
+        <input class="input" id="group-name-input" placeholder="Item or group name">
       </div>
-      <input class="photo-input-hidden" type="file" id="group-cam" accept="image/*" capture="environment" onchange="handleGroupPhoto(this)">
-      <input class="photo-input-hidden" type="file" id="group-lib" accept="image/*" onchange="handleGroupPhoto(this)">
-    </div>
-    <div class="divider"></div>
-    <div>
-      <div class="field-label" style="margin-bottom:10px">Sub-items</div>
-      <button class="btn-ai" id="ai-scan-btn" onclick="triggerInput('ai-scan-input')">
-        <span>✦ Scan with AI</span>
-      </button>
-      <input class="photo-input-hidden" type="file" id="ai-scan-input" accept="image/*" onchange="handleAIScan(this)">
-      <div class="subitem-list" id="subitem-list" style="margin-top:12px"></div>
-      <div class="input-row" style="margin-top:10px">
-        <input class="input" id="new-subitem-text" placeholder='Add sub-item manually...' onkeydown="if(event.key==='Enter')addSubitem()">
-        <button class="btn-secondary" style="width:auto;padding:13px 16px" onclick="addSubitem()">Add</button>
+      <div class="field">
+        <label class="field-label">Notes</label>
+        <textarea class="input" id="group-notes-input" placeholder="Condition, description, serial number…"></textarea>
+      </div>
+
+      <!-- Group photos -->
+      <div class="card">
+        <div class="card-pad" style="display:flex;flex-direction:column;gap:10px">
+          <span class="field-label">Photos</span>
+          <div class="photo-grid thumb-md" id="group-photos-grid"></div>
+          <div class="photo-add-btns">
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('grp-cam')">📷 Camera</button>
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('grp-lib')">🖼 Library</button>
+          </div>
+        </div>
+        <input class="file-hidden" type="file" id="grp-cam" accept="image/*" capture="environment" onchange="handleGroupPhoto(this)">
+        <input class="file-hidden" type="file" id="grp-lib" accept="image/*" onchange="handleGroupPhoto(this)">
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Sub-items -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="section-hdr" style="margin-bottom:0"><span class="section-title">Sub-items</span></div>
+
+        <!-- AI SCAN — prominent -->
+        <button class="btn btn-ai" id="ai-scan-btn" onclick="tap('ai-input')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Scan with AI — Photo to Items
+        </button>
+        <input class="file-hidden" type="file" id="ai-input" accept="image/*" onchange="handleAIScan(this)">
+
+        <div class="subitem-list" id="subitem-list"></div>
+
+        <div class="input-row">
+          <input class="input" id="new-subitem-text" placeholder="Add sub-item manually…" onkeydown="if(event.key==='Enter')addSubitem()">
+          <button class="btn btn-ghost btn-inline" onclick="addSubitem()">Add</button>
+        </div>
       </div>
     </div>
-    <div class="save-bar">
-      <button class="btn-primary" onclick="saveGroup()">Save</button>
+
+    <div class="sticky-footer">
+      <button class="btn btn-accent" onclick="saveGroup()">Save Changes</button>
     </div>
   </div>
 
-  <!-- SEARCH -->
+  <!-- ── SEARCH ── -->
   <div class="page" id="page-search">
-    <input class="input" id="search-input" placeholder="Search items, notes, sub-items..." oninput="doSearch(this.value)">
-    <div id="search-results"></div>
+    <div class="page-pad">
+      <input class="input" id="search-input" placeholder="Search boxes, items, sub-items…" oninput="doSearch(this.value)">
+      <div id="search-results"></div>
+    </div>
   </div>
-</div>
 
-<!-- AI RESULTS SHEET -->
-<div id="ai-overlay">
+</div><!-- /app -->
+
+<!-- AI SHEET -->
+<div id="ai-overlay" onclick="if(event.target===this)closeAI()">
   <div class="ai-sheet">
     <div class="ai-sheet-handle"></div>
-    <div class="ai-sheet-header">
-      <span class="ai-sheet-title">✦ AI found these items</span>
-      <button class="ai-sheet-close" onclick="closeAISheet()">✕</button>
+    <div class="ai-sheet-hdr">
+      <span class="ai-sheet-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        AI identified these items
+      </span>
+      <button class="ai-sheet-close" onclick="closeAI()">✕</button>
     </div>
-    <div class="ai-sheet-body" id="ai-sheet-body"></div>
+    <p class="ai-sheet-subtext">Tap to deselect anything that looks wrong.</p>
+    <div class="ai-items" id="ai-items"></div>
     <div class="ai-sheet-footer">
-      <button class="btn-secondary" style="flex:1" onclick="closeAISheet()">Cancel</button>
-      <button class="btn-primary" style="flex:2" onclick="confirmAIItems()">Add Selected</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="closeAI()">Cancel</button>
+      <button class="btn btn-accent" style="flex:2" onclick="confirmAI()">Add Selected</button>
     </div>
   </div>
 </div>
 
+<!-- LIGHTBOX -->
 <div id="lightbox" onclick="closeLightbox()">
   <button id="lightbox-close" onclick="closeLightbox()">✕</button>
-  <img id="lightbox-img" src="">
+  <img id="lightbox-img" src="" alt="">
 </div>
+
+<!-- TOAST -->
 <div id="toast"></div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwC_KiAtO-WMq6WBj7Zcv9RywBsnVufLDOVn8JjZe7khTZxnf5CurqS8dteyMOgF1AE/exec";
-const STORAGE_KEY = "boxly-v3";
-
-// ── NAV STACK ────────────────────────────────────────────
-// We maintain an explicit stack so back always goes to the right place
-let navStack = ['home'];
-
-function navTo(page) {
-  navStack.push(page);
-  renderPage(page);
-}
-
-function navBack() {
-  if (navStack.length > 1) navStack.pop();
-  const page = navStack[navStack.length - 1];
-  renderPage(page);
-}
-
-function renderPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-
-  const back = document.getElementById('back-btn');
-  const title = document.getElementById('header-title');
-  const searchBtn = document.getElementById('search-icon-btn');
-
-  back.style.display = navStack.length > 1 ? '' : 'none';
-  searchBtn.style.display = (page === 'home' || page === 'box') ? '' : 'none';
-
-  if (page === 'home') {
-    title.textContent = '📦 Boxly';
-    renderHome();
-  } else if (page === 'add-box') {
-    title.textContent = 'New Box';
-    setTimeout(() => document.getElementById('new-box-label').focus(), 100);
-  } else if (page === 'box') {
-    const b = getActiveBox();
-    title.textContent = b ? `Box ${b.num} — ${b.label}` : 'Box';
-    renderBoxDetail();
-    setTimeout(() => document.getElementById('new-group-text').focus(), 100);
-  } else if (page === 'group') {
-    const b = getActiveBox();
-    title.textContent = b ? `Box ${b.num}` : 'Item';
-    renderGroupDetail();
-  } else if (page === 'search') {
-    title.textContent = 'Search';
-    document.getElementById('search-input').value = '';
-    document.getElementById('search-results').innerHTML = '';
-    setTimeout(() => document.getElementById('search-input').focus(), 100);
-  }
-}
+const LOCAL_KEY  = "boxly-v3";
 
 // ── STATE ────────────────────────────────────────────────
-let state = { boxes: [], activeBoxId: null, activeGroupId: null, aiPendingItems: [] };
+let S = {
+  boxes:         [],
+  activeBoxId:   null,
+  activeGroupId: null,
+  aiItems:       [],
+};
+let navStack = ['home'];
 
-function saveLocal() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.boxes)); } catch {} }
-function loadLocal() { try { const r = localStorage.getItem(STORAGE_KEY); if (r) state.boxes = JSON.parse(r); } catch {} }
-function getActiveBox() { return state.boxes.find(b => b.id === state.activeBoxId) || null; }
-function getActiveGroup() { const box = getActiveBox(); return box ? (box.groups.find(g => g.id === state.activeGroupId) || null) : null; }
+// ── LOCAL STORAGE ────────────────────────────────────────
+function save()  { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(S.boxes)); } catch {} }
+function load()  { try { const r = localStorage.getItem(LOCAL_KEY); if (r) S.boxes = JSON.parse(r); } catch {} }
+function box()   { return S.boxes.find(b => b.id === S.activeBoxId) || null; }
+function group() { const b = box(); return b ? (b.groups.find(g => g.id === S.activeGroupId) || null) : null; }
 
 // ── SYNC ─────────────────────────────────────────────────
-function setSyncStatus(s) { document.getElementById('sync-dot').className = 'sync-dot ' + s; }
-
-async function syncPost(payload) {
-  setSyncStatus('syncing');
+function syncStatus(state, label) {
+  const pill  = document.getElementById('sync-pill');
+  const lbl   = document.getElementById('sync-label');
+  pill.className = 'sync-pill ' + (state || '');
+  lbl.textContent = label || 'Sync';
+}
+async function push(payload) {
+  syncStatus('syncing', 'Saving…');
   try {
     await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-    setSyncStatus('synced');
-    setTimeout(() => setSyncStatus(''), 3000);
-  } catch { setSyncStatus('error'); toast('Sync failed — saved locally'); }
+    syncStatus('synced', 'Saved');
+    setTimeout(() => syncStatus('', 'Sync'), 2500);
+  } catch { syncStatus('error', 'Offline'); }
 }
-
-async function loadFromSheet() {
-  setSyncStatus('syncing');
+async function pullSheet() {
+  syncStatus('syncing', 'Loading…');
   try {
-    const res = await fetch(SCRIPT_URL + '?action=getAll');
-    const data = await res.json();
-    if (data.success && data.items && data.items.length > 0 && state.boxes.length === 0) {
-      const boxMap = {};
+    const r    = await fetch(SCRIPT_URL + '?action=getAll');
+    const data = await r.json();
+    if (data.success && data.items && data.items.length && !S.boxes.length) {
+      const map = {};
       data.items.forEach(row => {
-        const num = parseInt(row.boxNum);
-        if (!boxMap[num]) {
-          let bp = []; try { bp = JSON.parse(row.boxPhotos || '[]'); } catch {}
-          boxMap[num] = { id: num, num, label: row.boxLabel, photos: bp, groups: [] };
+        const n = parseInt(row.boxNum);
+        if (!map[n]) {
+          let bp = []; try { bp = JSON.parse(row.boxPhotos||'[]'); } catch {}
+          map[n] = { id: n, num: n, label: row.boxLabel, photos: bp, groups: [] };
         }
         if (row.itemId) {
-          let photos = []; try { photos = JSON.parse(row.photoUrls || '[]'); } catch {}
-          let subitems = []; try { subitems = JSON.parse(row.subitems || '[]'); } catch {}
-          boxMap[num].groups.push({ id: row.itemId, name: row.itemText, notes: row.notes || '', photos, subitems });
+          let ph = []; try { ph = JSON.parse(row.photoUrls||'[]'); } catch {}
+          let si = []; try { si = JSON.parse(row.subitems||'[]');  } catch {}
+          map[n].groups.push({ id: row.itemId, name: row.itemText, notes: row.notes||'', photos: ph, subitems: si });
         }
       });
-      state.boxes = Object.values(boxMap).sort((a, b) => a.num - b.num);
-      saveLocal();
+      S.boxes = Object.values(map).sort((a,b) => a.num - b.num);
+      save();
     }
-    setSyncStatus('synced');
-    setTimeout(() => setSyncStatus(''), 3000);
-  } catch { setSyncStatus('error'); }
+    syncStatus('synced', 'Saved');
+    setTimeout(() => syncStatus('', 'Sync'), 2500);
+  } catch { syncStatus('error', 'Offline'); }
   renderHome();
 }
 
-// ── TOAST ────────────────────────────────────────────────
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
+// ── NAVIGATION ───────────────────────────────────────────
+function navTo(page) { navStack.push(page); render(page); }
+function navBack()   { if (navStack.length > 1) navStack.pop(); render(navStack[navStack.length-1]); }
+
+function render(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+
+  const back   = document.getElementById('hdr-back');
+  const title  = document.getElementById('hdr-title');
+  const search = document.getElementById('hdr-search');
+
+  back.style.display  = navStack.length > 1 ? 'flex' : 'none';
+  search.style.display = ['home','box'].includes(page) ? 'flex' : 'none';
+
+  if (page === 'home')     { title.textContent = '📦 Boxly'; renderHome(); }
+  if (page === 'add-box')  { title.textContent = 'New Box'; setTimeout(() => document.getElementById('new-box-label').focus(), 80); }
+  if (page === 'box')      { const b = box(); title.textContent = b ? `Box ${b.num}` : 'Box'; renderBox(); setTimeout(() => document.getElementById('new-group-text').focus(), 80); }
+  if (page === 'group')    { const b = box(); title.textContent = b ? `Box ${b.num} — Items` : 'Item'; renderGroup(); }
+  if (page === 'search')   { title.textContent = 'Search'; document.getElementById('search-input').value = ''; document.getElementById('search-results').innerHTML = ''; setTimeout(() => document.getElementById('search-input').focus(), 80); }
 }
 
 // ── HOME ─────────────────────────────────────────────────
 function renderHome() {
-  const totalItems = state.boxes.reduce((a, b) => a + b.groups.length, 0);
-  document.getElementById('stat-boxes').textContent = state.boxes.length;
-  document.getElementById('stat-items').textContent = totalItems;
-  const list = document.getElementById('box-list');
-  if (!state.boxes.length) { list.innerHTML = '<div class="empty">No boxes yet.</div>'; return; }
-  list.innerHTML = state.boxes.slice().sort((a, b) => a.num - b.num).map(b => {
-    const photos = b.photos || [];
-    const strip = photos.length ? `<div class="box-photo-strip">${photos.map(u => `<img src="${esc(u)}" onclick="event.stopPropagation();openLightbox('${esc(u)}')" loading="lazy">`).join('')}</div>` : '';
-    return `<div class="box-card" onclick="openBox(${b.id})">
-      <div class="box-card-main">
-        <span class="box-num">#${b.num}</span>
-        <span class="box-label-text">${esc(b.label)}</span>
-        <span class="box-meta">${b.groups.length} item${b.groups.length !== 1 ? 's' : ''}</span>
-        <span class="chevron">›</span>
-      </div>${strip}</div>`;
+  const total = S.boxes.reduce((a,b) => a + b.groups.length, 0);
+  document.getElementById('stat-boxes').textContent = S.boxes.length;
+  document.getElementById('stat-items').textContent = total;
+  const el = document.getElementById('box-list');
+  if (!S.boxes.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap below to get started.</p></div>'; return; }
+  el.innerHTML = S.boxes.slice().sort((a,b) => a.num-b.num).map(b => {
+    const strip = (b.photos||[]).length
+      ? `<div class="box-photo-row">${(b.photos||[]).map(u=>`<img src="${x(u)}" onclick="event.stopPropagation();lb('${x(u)}')" loading="lazy">`).join('')}</div>`
+      : '';
+    return `<button class="box-card" onclick="openBox(${b.id})">
+      <div class="box-card-top">
+        <div class="box-num-badge">${b.num}</div>
+        <div class="box-card-body">
+          <div class="box-card-name">${x(b.label)}</div>
+          <div class="box-card-meta">${b.groups.length} item${b.groups.length!==1?'s':''}</div>
+        </div>
+        <span class="box-card-arrow">›</span>
+      </div>${strip}
+    </button>`;
   }).join('');
 }
 
-function openBox(id) {
-  state.activeBoxId = id;
-  navTo('box');
-}
+function openBox(id) { S.activeBoxId = id; navTo('box'); }
 
 // ── CREATE BOX ───────────────────────────────────────────
 function createBox() {
   const label = document.getElementById('new-box-label').value.trim();
   if (!label) return;
-  const num = state.boxes.length ? Math.max(...state.boxes.map(b => b.num)) + 1 : 1;
-  const box = { id: Date.now(), num, label, photos: [], groups: [] };
-  state.boxes.push(box);
-  saveLocal();
+  const num = S.boxes.length ? Math.max(...S.boxes.map(b=>b.num)) + 1 : 1;
+  const b = { id: Date.now(), num, label, photos: [], groups: [] };
+  S.boxes.push(b); save();
   document.getElementById('new-box-label').value = '';
-  state.activeBoxId = box.id;
-  // Replace add-box in stack with box
-  navStack[navStack.length - 1] = 'box';
-  renderPage('box');
-  toast(`Box ${num} created`);
-  syncPost({ action: 'createBox', boxNum: num, boxLabel: label });
+  S.activeBoxId = b.id;
+  navStack[navStack.length-1] = 'box';
+  render('box');
+  toast(`Box ${num} created ✓`);
+  push({ action:'createBox', boxNum:num, boxLabel:label });
 }
 
 // ── BOX DETAIL ───────────────────────────────────────────
-function renderBoxDetail() {
-  const box = getActiveBox(); if (!box) return;
-  document.getElementById('header-title').textContent = `Box ${box.num} — ${box.label}`;
-  const bg = document.getElementById('box-photos-grid');
-  bg.innerHTML = (box.photos || []).map((url, i) => `
-    <div class="photo-wrap photo-sm">
-      <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" loading="lazy">
-      <div class="del-dot" onclick="deleteBoxPhoto(${i})">✕</div>
-    </div>`).join('');
-  const list = document.getElementById('group-list');
-  if (!box.groups.length) { list.innerHTML = '<div class="empty">No items yet.</div>'; return; }
-  list.innerHTML = box.groups.map(g => {
-    const photos = g.photos || [];
-    const subitems = g.subitems || [];
-    const thumb = photos[0] ? `<img class="group-card-thumb" src="${esc(photos[0])}" loading="lazy">` : '';
-    const parts = [
-      subitems.length ? `${subitems.length} sub-item${subitems.length !== 1 ? 's' : ''}` : '',
-      photos.length ? `${photos.length} photo${photos.length !== 1 ? 's' : ''}` : '',
-      g.notes ? g.notes.substring(0, 50) + (g.notes.length > 50 ? '…' : '') : ''
-    ].filter(Boolean);
+function renderBox() {
+  const b = box(); if (!b) return;
+  document.getElementById('hdr-title').textContent = `Box ${b.num} — ${b.label}`;
+  // Photos
+  document.getElementById('box-photos-grid').innerHTML = (b.photos||[]).map((u,i) =>
+    `<div class="photo-thumb-wrap thumb-sm"><img src="${x(u)}" onclick="lb('${x(u)}')" loading="lazy"><div class="photo-del" onclick="delBoxPhoto(${i})">✕</div></div>`
+  ).join('');
+  // Groups
+  const el = document.getElementById('group-list');
+  if (!b.groups.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No items yet.</p></div>'; return; }
+  el.innerHTML = b.groups.map(g => {
+    const ph = g.photos||[], si = g.subitems||[];
+    const thumb = ph[0]
+      ? `<img class="group-thumb" src="${x(ph[0])}" loading="lazy">`
+      : `<div class="group-no-thumb">📦</div>`;
+    const meta = [
+      si.length ? `${si.length} sub-item${si.length!==1?'s':''}` : '',
+      ph.length ? `${ph.length} photo${ph.length!==1?'s':''}` : '',
+      g.notes   ? g.notes.substring(0,48)+(g.notes.length>48?'…':'') : ''
+    ].filter(Boolean).join('  ·  ');
     return `<div class="group-card">
-      <div class="group-card-header" onclick="openGroup('${esc(g.id)}')">
+      <div class="group-card-row" onclick="openGroup('${x(g.id)}')">
         ${thumb}
-        <div style="flex:1;min-width:0">
-          <div class="group-card-name">${esc(g.name)}</div>
-          ${parts.length ? `<div class="group-card-meta">${esc(parts.join(' · '))}</div>` : ''}
+        <div class="group-info">
+          <div class="group-name">${x(g.name)}</div>
+          ${meta ? `<div class="group-meta">${x(meta)}</div>` : ''}
         </div>
-        <span class="chevron">›</span>
-        <button class="group-del-btn" onclick="event.stopPropagation();deleteGroup('${esc(g.id)}')">✕</button>
-      </div></div>`;
+        <span class="group-arrow">›</span>
+        <button class="group-del" onclick="event.stopPropagation();delGroup('${x(g.id)}')">✕</button>
+      </div>
+    </div>`;
   }).join('');
 }
 
 async function handleBoxPhoto(input) {
   const file = input.files[0]; if (!file) return;
-  const box = getActiveBox(); if (!box) return;
+  const b = box(); if (!b) return;
   toast('Uploading…');
   try {
-    const b64 = await compressImage(file);
-    const url = await uploadPhoto(b64, `box-${box.num}-${Date.now()}.jpg`);
-    if (url) { if (!box.photos) box.photos = []; box.photos.push(url); saveLocal(); renderBoxDetail(); renderHome(); toast('Photo added'); }
+    const url = await upload(await compress(file), `box-${b.num}-${Date.now()}.jpg`);
+    if (url) { if(!b.photos) b.photos=[]; b.photos.push(url); save(); renderBox(); renderHome(); toast('Photo added ✓'); }
   } catch { toast('Upload failed'); }
   input.value = '';
 }
-
-function deleteBoxPhoto(i) {
-  const box = getActiveBox(); if (!box) return;
-  box.photos.splice(i, 1); saveLocal(); renderBoxDetail(); renderHome();
-  syncPost({ action: 'updateBoxPhotos', boxNum: box.num, boxPhotos: JSON.stringify(box.photos) });
+function delBoxPhoto(i) {
+  const b = box(); if (!b) return;
+  b.photos.splice(i,1); save(); renderBox(); renderHome();
+  push({ action:'updateBoxPhotos', boxNum:b.num, boxPhotos:JSON.stringify(b.photos) });
 }
-
 function addGroup() {
-  const name = document.getElementById('new-group-text').value.trim();
-  if (!name) return;
-  const box = getActiveBox(); if (!box) return;
-  const group = { id: Date.now().toString(), name, notes: '', photos: [], subitems: [] };
-  box.groups.push(group);
-  saveLocal(); renderBoxDetail(); renderHome();
+  const name = document.getElementById('new-group-text').value.trim(); if (!name) return;
+  const b = box(); if (!b) return;
+  const g = { id: Date.now().toString(), name, notes:'', photos:[], subitems:[] };
+  b.groups.push(g); save(); renderBox(); renderHome();
   document.getElementById('new-group-text').value = '';
-  toast('Item added');
-  syncPost({ action: 'addItem', boxNum: box.num, boxLabel: box.label, itemId: group.id, itemText: name, notes: '', photoUrls: '[]', subitems: '[]' });
+  toast('Item added ✓');
+  push({ action:'addItem', boxNum:b.num, boxLabel:b.label, itemId:g.id, itemText:name, notes:'', photoUrls:'[]', subitems:'[]' });
+}
+function delGroup(id) {
+  const b = box(); if (!b) return;
+  if (!confirm('Remove this item?')) return;
+  b.groups = b.groups.filter(g => g.id !== id); save(); renderBox(); renderHome();
+  push({ action:'deleteItem', itemId:id });
+}
+function deleteCurrentBox() {
+  const b = box(); if (!b) return;
+  if (!confirm(`Delete Box ${b.num} — ${b.label}? This cannot be undone.`)) return;
+  S.boxes = S.boxes.filter(bx => bx.id !== S.activeBoxId);
+  S.activeBoxId = null; save(); renderHome();
+  navStack = ['home']; render('home');
+  push({ action:'deleteBox', boxNum:b.num });
+  toast('Box deleted');
 }
 
 // ── GROUP DETAIL ─────────────────────────────────────────
-function openGroup(groupId) {
-  state.activeGroupId = groupId;
-  navTo('group');
-}
-
-function renderGroupDetail() {
-  const group = getActiveGroup(); if (!group) return;
-  document.getElementById('group-name-input').value = group.name;
-  document.getElementById('group-notes-input').value = group.notes || '';
-  const pg = document.getElementById('group-photos-grid');
-  pg.innerHTML = (group.photos || []).map((url, i) => `
-    <div class="photo-wrap photo-md">
-      <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" loading="lazy">
-      <div class="del-dot" onclick="deleteGroupPhoto(${i})">✕</div>
-    </div>`).join('');
+function openGroup(id) { S.activeGroupId = id; navTo('group'); }
+function renderGroup() {
+  const g = group(); if (!g) return;
+  document.getElementById('group-name-input').value  = g.name;
+  document.getElementById('group-notes-input').value = g.notes||'';
+  document.getElementById('group-photos-grid').innerHTML = (g.photos||[]).map((u,i) =>
+    `<div class="photo-thumb-wrap thumb-md"><img src="${x(u)}" onclick="lb('${x(u)}')" loading="lazy"><div class="photo-del" onclick="delGroupPhoto(${i})">✕</div></div>`
+  ).join('');
   renderSubitems();
 }
-
 async function handleGroupPhoto(input) {
   const file = input.files[0]; if (!file) return;
-  const group = getActiveGroup(); if (!group) return;
+  const g = group(); if (!g) return;
   toast('Uploading…');
   try {
-    const b64 = await compressImage(file);
-    const url = await uploadPhoto(b64, `group-${group.id}-${Date.now()}.jpg`);
-    if (url) { if (!group.photos) group.photos = []; group.photos.push(url); saveLocal(); renderGroupDetail(); toast('Photo added'); }
+    const url = await upload(await compress(file), `grp-${g.id}-${Date.now()}.jpg`);
+    if (url) { if(!g.photos) g.photos=[]; g.photos.push(url); save(); renderGroup(); toast('Photo added ✓'); }
   } catch { toast('Upload failed'); }
   input.value = '';
 }
+function delGroupPhoto(i) { const g = group(); if (!g) return; g.photos.splice(i,1); save(); renderGroup(); }
 
-function deleteGroupPhoto(i) {
-  const group = getActiveGroup(); if (!group) return;
-  group.photos.splice(i, 1); saveLocal(); renderGroupDetail();
+function saveGroup() {
+  const g = group(); if (!g) return;
+  const b = box();
+  g.name  = document.getElementById('group-name-input').value.trim()  || g.name;
+  g.notes = document.getElementById('group-notes-input').value.trim();
+  save(); renderHome();
+  push({ action:'updateItem', itemId:g.id, itemText:g.name, notes:g.notes, photoUrls:JSON.stringify(g.photos||[]), subitems:JSON.stringify(g.subitems||[]), boxNum:b?b.num:0, boxLabel:b?b.label:'' });
+  toast('Saved ✓');
+  navBack();
 }
 
 // ── AI SCAN ──────────────────────────────────────────────
@@ -517,218 +885,172 @@ async function handleAIScan(input) {
   const file = input.files[0]; if (!file) return;
   const btn = document.getElementById('ai-scan-btn');
   btn.disabled = true;
-  btn.innerHTML = '<div class="ai-spinner"></div><span>Scanning…</span>';
+  btn.innerHTML = '<div class="ai-spinner"></div> Scanning with AI…';
   try {
-    const b64 = await compressImage(file, 1600);
-    const group = getActiveGroup();
-    const groupName = group ? group.name : 'items';
+    const b64 = await compress(file, 1600);
+    const g   = group();
     const res = await fetch(SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'scanWithAI', imageBase64: b64, groupName })
+      body: JSON.stringify({ action:'scanWithAI', imageBase64:b64, groupName: g ? g.name : 'items' })
     });
     const data = await res.json();
-    if (!data.success || !data.items || !data.items.length) { toast('No items detected'); return; }
-    state.aiPendingItems = data.items.map((name, i) => ({ name, selected: true, id: i }));
+    if (!data.success || !data.items || !data.items.length) { toast('No items detected — try a clearer photo'); return; }
+    S.aiItems = data.items.map((name,i) => ({ name, sel:true, id:i }));
     renderAISheet();
     document.getElementById('ai-overlay').classList.add('open');
-  } catch (e) {
+  } catch(e) {
     console.error(e);
-    toast('AI scan failed');
+    toast('AI scan failed — check connection');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<span>✦ Scan with AI</span>';
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Scan with AI — Photo to Items';
     input.value = '';
   }
 }
-
 function renderAISheet() {
-  document.getElementById('ai-sheet-body').innerHTML = state.aiPendingItems.map((item, i) => `
-    <div class="ai-item-row" onclick="toggleAIItem(${i})">
-      <div class="ai-check ${item.selected ? 'checked' : ''}" id="ai-check-${i}">${item.selected ? '✓' : ''}</div>
-      <span class="ai-item-name">${esc(item.name)}</span>
-    </div>`).join('');
+  document.getElementById('ai-items').innerHTML = S.aiItems.map((item,i) =>
+    `<div class="ai-item ${item.sel?'selected':''}" onclick="toggleAI(${i})">
+      <div class="ai-check">${item.sel?'✓':''}</div>
+      <span class="ai-item-name">${x(item.name)}</span>
+    </div>`
+  ).join('');
 }
-
-function toggleAIItem(i) {
-  state.aiPendingItems[i].selected = !state.aiPendingItems[i].selected;
-  const el = document.getElementById('ai-check-' + i);
-  el.classList.toggle('checked', state.aiPendingItems[i].selected);
-  el.textContent = state.aiPendingItems[i].selected ? '✓' : '';
+function toggleAI(i) {
+  S.aiItems[i].sel = !S.aiItems[i].sel;
+  const el = document.getElementById('ai-items').children[i];
+  el.classList.toggle('selected', S.aiItems[i].sel);
+  el.querySelector('.ai-check').textContent = S.aiItems[i].sel ? '✓' : '';
 }
-
-function confirmAIItems() {
-  const group = getActiveGroup(); if (!group) return;
-  const selected = state.aiPendingItems.filter(i => i.selected);
-  if (!selected.length) { toast('Nothing selected'); return; }
-  selected.forEach(item => {
-    group.subitems.push({ id: Date.now().toString() + Math.random(), name: item.name, photos: [] });
-  });
-  saveLocal(); renderSubitems(); closeAISheet();
-  toast(`${selected.length} item${selected.length !== 1 ? 's' : ''} added`);
+function confirmAI() {
+  const g = group(); if (!g) return;
+  const sel = S.aiItems.filter(i => i.sel);
+  if (!sel.length) { toast('Nothing selected'); return; }
+  sel.forEach(item => g.subitems.push({ id: Date.now().toString()+Math.random(), name:item.name, photos:[] }));
+  save(); renderSubitems(); closeAI();
+  toast(`${sel.length} item${sel.length!==1?'s':''} added ✓`);
 }
-
-function closeAISheet() {
-  document.getElementById('ai-overlay').classList.remove('open');
-  state.aiPendingItems = [];
-}
+function closeAI() { document.getElementById('ai-overlay').classList.remove('open'); S.aiItems = []; }
 
 // ── SUB-ITEMS ────────────────────────────────────────────
 function renderSubitems() {
-  const group = getActiveGroup(); if (!group) return;
-  const list = document.getElementById('subitem-list');
-  if (!(group.subitems || []).length) { list.innerHTML = '<div class="empty" style="padding:16px 0">No sub-items yet. Scan with AI or add manually.</div>'; return; }
-  list.innerHTML = group.subitems.map(si => {
-    const photos = si.photos || [];
-    const photosHtml = photos.map((url, pi) => `
-      <div class="subitem-photo-wrap">
-        <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" loading="lazy">
-        <div class="del-dot" onclick="deleteSubitemPhoto('${esc(si.id)}',${pi})">✕</div>
-      </div>`).join('');
+  const g = group(); if (!g) return;
+  const el = document.getElementById('subitem-list');
+  if (!(g.subitems||[]).length) {
+    el.innerHTML = '<div class="empty-state" style="padding:16px 0"><p>No sub-items yet.<br>Scan with AI or add manually.</p></div>';
+    return;
+  }
+  el.innerHTML = g.subitems.map(si => {
+    const ph = si.photos||[];
+    const photosHtml = ph.map((u,pi) =>
+      `<div class="subitem-photo-wrap"><img src="${x(u)}" onclick="lb('${x(u)}')" loading="lazy"><div class="subitem-photo-del" onclick="delSIPhoto('${x(si.id)}',${pi})">✕</div></div>`
+    ).join('');
     return `<div class="subitem-card">
-      <div class="subitem-header">
-        <span class="subitem-name">${esc(si.name)}</span>
-        ${photos.length ? `<span class="subitem-photo-count">📷 ${photos.length}</span>` : ''}
-        <button class="subitem-expand-btn" onclick="toggleSubitem('${esc(si.id)}')">⌄</button>
-        <button class="subitem-del-btn" onclick="deleteSubitem('${esc(si.id)}')">✕</button>
+      <div class="subitem-row">
+        <span class="subitem-icon">—</span>
+        <span class="subitem-name">${x(si.name)}</span>
+        ${ph.length ? `<span class="subitem-photo-badge">📷 ${ph.length}</span>` : ''}
+        <button class="subitem-expand" onclick="toggleSI('${x(si.id)}')">⌄</button>
+        <button class="subitem-del"    onclick="delSI('${x(si.id)}')">✕</button>
       </div>
-      <div class="subitem-body hidden" id="sib-${esc(si.id)}">
-        <div class="subitem-photos">${photosHtml}</div>
-        <div class="subitem-add-photo-btns">
-          <button class="btn-photo-sm" onclick="triggerInput('si-cam-${esc(si.id)}')">📷 Camera</button>
-          <button class="btn-photo-sm" onclick="triggerInput('si-lib-${esc(si.id)}')">🖼 Library</button>
+      <div class="subitem-body hidden" id="sib-${x(si.id)}">
+        ${ph.length ? `<div class="subitem-photos">${photosHtml}</div>` : ''}
+        <div class="photo-add-btns">
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('sic-${x(si.id)}')">📷 Camera</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="tap('sil-${x(si.id)}')">🖼 Library</button>
         </div>
-        <input class="photo-input-hidden" type="file" id="si-cam-${esc(si.id)}" accept="image/*" capture="environment" onchange="handleSubitemPhoto(this,'${esc(si.id)}')">
-        <input class="photo-input-hidden" type="file" id="si-lib-${esc(si.id)}" accept="image/*" onchange="handleSubitemPhoto(this,'${esc(si.id)}')">
-      </div></div>`;
+        <input class="file-hidden" type="file" id="sic-${x(si.id)}" accept="image/*" capture="environment" onchange="handleSIPhoto(this,'${x(si.id)}')">
+        <input class="file-hidden" type="file" id="sil-${x(si.id)}" accept="image/*" onchange="handleSIPhoto(this,'${x(si.id)}')">
+      </div>
+    </div>`;
   }).join('');
 }
-
-function toggleSubitem(siId) {
-  const body = document.getElementById('sib-' + siId); if (!body) return;
-  const hidden = body.classList.toggle('hidden');
-  const btn = body.previousElementSibling.querySelector('.subitem-expand-btn');
-  if (btn) btn.textContent = hidden ? '⌄' : '⌃';
+function toggleSI(id) {
+  const b = document.getElementById('sib-'+id); if (!b) return;
+  const hidden = b.classList.toggle('hidden');
+  b.previousElementSibling.querySelector('.subitem-expand').textContent = hidden ? '⌄' : '⌃';
 }
-
 function addSubitem() {
   const name = document.getElementById('new-subitem-text').value.trim(); if (!name) return;
-  const group = getActiveGroup(); if (!group) return;
-  if (!group.subitems) group.subitems = [];
-  group.subitems.push({ id: Date.now().toString(), name, photos: [] });
-  saveLocal(); renderSubitems();
+  const g = group(); if (!g) return;
+  if (!g.subitems) g.subitems = [];
+  g.subitems.push({ id: Date.now().toString(), name, photos:[] });
+  save(); renderSubitems();
   document.getElementById('new-subitem-text').value = '';
 }
-
-function deleteSubitem(siId) {
-  const group = getActiveGroup(); if (!group) return;
-  group.subitems = group.subitems.filter(s => s.id !== siId);
-  saveLocal(); renderSubitems();
-}
-
-async function handleSubitemPhoto(input, siId) {
+function delSI(id) { const g = group(); if (!g) return; g.subitems = g.subitems.filter(s=>s.id!==id); save(); renderSubitems(); }
+async function handleSIPhoto(input, id) {
   const file = input.files[0]; if (!file) return;
-  const group = getActiveGroup(); if (!group) return;
-  const si = group.subitems.find(s => s.id === siId); if (!si) return;
+  const g = group(); if (!g) return;
+  const si = g.subitems.find(s=>s.id===id); if (!si) return;
   toast('Uploading…');
   try {
-    const b64 = await compressImage(file);
-    const url = await uploadPhoto(b64, `si-${siId}-${Date.now()}.jpg`);
-    if (url) { if (!si.photos) si.photos = []; si.photos.push(url); saveLocal(); renderSubitems(); toast('Photo added'); }
+    const url = await upload(await compress(file), `si-${id}-${Date.now()}.jpg`);
+    if (url) { if(!si.photos) si.photos=[]; si.photos.push(url); save(); renderSubitems(); toast('Photo added ✓'); }
   } catch { toast('Upload failed'); }
   input.value = '';
 }
-
-function deleteSubitemPhoto(siId, pi) {
-  const group = getActiveGroup(); if (!group) return;
-  const si = group.subitems.find(s => s.id === siId); if (!si) return;
-  si.photos.splice(pi, 1); saveLocal(); renderSubitems();
-}
-
-function saveGroup() {
-  const group = getActiveGroup(); if (!group) return;
-  const box = getActiveBox();
-  group.name = document.getElementById('group-name-input').value.trim() || group.name;
-  group.notes = document.getElementById('group-notes-input').value.trim();
-  saveLocal(); renderHome();
-  syncPost({ action: 'updateItem', itemId: group.id, itemText: group.name, notes: group.notes, photoUrls: JSON.stringify(group.photos || []), subitems: JSON.stringify(group.subitems || []), boxNum: box ? box.num : 0, boxLabel: box ? box.label : '' });
-  toast('Saved');
-  navBack();
-}
-
-function deleteGroup(groupId) {
-  const box = getActiveBox(); if (!box) return;
-  if (!confirm('Remove this item?')) return;
-  box.groups = box.groups.filter(g => g.id !== groupId);
-  saveLocal(); renderBoxDetail(); renderHome();
-  syncPost({ action: 'deleteItem', itemId: groupId });
-}
-
-function deleteCurrentBox() {
-  const box = getActiveBox(); if (!box) return;
-  if (!confirm(`Delete Box ${box.num} — ${box.label}?`)) return;
-  state.boxes = state.boxes.filter(b => b.id !== state.activeBoxId);
-  state.activeBoxId = null;
-  saveLocal(); renderHome();
-  navStack = ['home'];
-  renderPage('home');
-  syncPost({ action: 'deleteBox', boxNum: box.num });
-  toast('Box deleted');
-}
+function delSIPhoto(id,pi) { const g=group();if(!g)return;const si=g.subitems.find(s=>s.id===id);if(!si)return;si.photos.splice(pi,1);save();renderSubitems(); }
 
 // ── SEARCH ───────────────────────────────────────────────
 function doSearch(q) {
-  const container = document.getElementById('search-results');
+  const el = document.getElementById('search-results');
   q = q.trim().toLowerCase();
-  if (!q) { container.innerHTML = ''; return; }
-  const boxHits = [], groupHits = [], subitemHits = [];
-  state.boxes.forEach(b => {
-    if (b.label.toLowerCase().includes(q)) boxHits.push(b);
-    (b.groups || []).forEach(g => {
-      if (g.name.toLowerCase().includes(q) || (g.notes || '').toLowerCase().includes(q)) groupHits.push({ box: b, group: g });
-      (g.subitems || []).forEach(si => { if (si.name.toLowerCase().includes(q)) subitemHits.push({ box: b, group: g, si }); });
+  if (!q) { el.innerHTML = ''; return; }
+  const bHits=[], gHits=[], sHits=[];
+  S.boxes.forEach(b => {
+    if (b.label.toLowerCase().includes(q)) bHits.push(b);
+    (b.groups||[]).forEach(g => {
+      if (g.name.toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)) gHits.push({b,g});
+      (g.subitems||[]).forEach(si => { if(si.name.toLowerCase().includes(q)) sHits.push({b,g,si}); });
     });
   });
-  if (!boxHits.length && !groupHits.length && !subitemHits.length) { container.innerHTML = `<div class="empty">Nothing found for "${esc(q)}"</div>`; return; }
-  let html = '';
-  if (boxHits.length) { html += `<div class="section-label" style="margin-bottom:10px">Boxes</div>`; html += boxHits.map(b => `<button class="search-result" onclick="openBox(${b.id})"><span class="result-badge">Box ${b.num}</span><span class="result-text">${esc(b.label)}</span><span class="result-sub">${b.groups.length} items</span></button>`).join(''); }
-  if (groupHits.length) { html += `<div class="section-label" style="margin:${boxHits.length ? '14px' : 0} 0 10px">Items</div>`; html += groupHits.map(({ box, group }) => { const t = group.photos && group.photos[0] ? `<img class="result-thumb" src="${esc(group.photos[0])}" loading="lazy">` : ''; return `<button class="search-result" onclick="openBox(${box.id})"><span class="result-badge">Box ${box.num}</span>${t}<span class="result-text">${esc(group.name)}</span><span class="result-sub">${esc(box.label)}</span></button>`; }).join(''); }
-  if (subitemHits.length) { html += `<div class="section-label" style="margin:${(boxHits.length || groupHits.length) ? '14px' : 0} 0 10px">Sub-items</div>`; html += subitemHits.map(({ box, group, si }) => { const t = si.photos && si.photos[0] ? `<img class="result-thumb" src="${esc(si.photos[0])}" loading="lazy">` : ''; return `<button class="search-result" onclick="openBox(${box.id})"><span class="result-badge">Box ${box.num}</span>${t}<span class="result-text">${esc(si.name)}</span><span class="result-sub">${esc(group.name)}</span></button>`; }).join(''); }
-  container.innerHTML = html;
+  if (!bHits.length&&!gHits.length&&!sHits.length) { el.innerHTML=`<div class="empty-state"><p>Nothing found for "<strong>${x(q)}</strong>"</p></div>`; return; }
+  let html='';
+  const sec = (t,m) => `<div class="section-title" style="margin:${m} 0 10px">${t}</div>`;
+  if (bHits.length) { html+=sec('Boxes','0'); html+=bHits.map(b=>`<button class="search-hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span><span class="hit-text">${x(b.label)}</span><span class="hit-sub">${b.groups.length} items</span></button>`).join(''); }
+  if (gHits.length) { html+=sec('Items',bHits.length?'16px':'0'); html+=gHits.map(({b,g})=>{const t=g.photos&&g.photos[0]?`<img class="hit-thumb" src="${x(g.photos[0])}" loading="lazy">`:'';return`<button class="search-hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span>${t}<span class="hit-text">${x(g.name)}</span><span class="hit-sub">${x(b.label)}</span></button>`;}).join(''); }
+  if (sHits.length) { html+=sec('Sub-items',(bHits.length||gHits.length)?'16px':'0'); html+=sHits.map(({b,g,si})=>{const t=si.photos&&si.photos[0]?`<img class="hit-thumb" src="${x(si.photos[0])}" loading="lazy">`:'';return`<button class="search-hit" onclick="openBox(${b.id})"><span class="hit-badge">Box ${b.num}</span>${t}<span class="hit-text">${x(si.name)}</span><span class="hit-sub">${x(g.name)}</span></button>`;}).join(''); }
+  el.innerHTML = html;
 }
 
 // ── PHOTO UTILS ──────────────────────────────────────────
-function compressImage(file, maxSize = 1200) {
-  return new Promise((resolve, reject) => {
+function compress(file, maxPx=1200) {
+  return new Promise((res,rej) => {
     const reader = new FileReader();
     reader.onload = e => {
       const img = new Image();
       img.onload = () => {
-        let w = img.width, h = img.height;
-        if (w > h && w > maxSize) { h = h * maxSize / w; w = maxSize; } else if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
-        const c = document.createElement('canvas'); c.width = w; c.height = h;
-        c.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(c.toDataURL('image/jpeg', 0.82).split(',')[1]);
+        let w=img.width, h=img.height;
+        if (w>h&&w>maxPx){h=h*maxPx/w;w=maxPx;} else if(h>maxPx){w=w*maxPx/h;h=maxPx;}
+        const c = document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        res(c.toDataURL('image/jpeg',0.82).split(',')[1]);
       };
-      img.onerror = reject; img.src = e.target.result;
+      img.onerror=rej; img.src=e.target.result;
     };
-    reader.onerror = reject; reader.readAsDataURL(file);
+    reader.onerror=rej; reader.readAsDataURL(file);
   });
 }
-
-async function uploadPhoto(b64, name) {
-  const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPhoto', imageBase64: b64, fileName: name }) });
-  const d = await res.json(); return d.success ? d.url : null;
+async function upload(b64, name) {
+  const r = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'uploadPhoto', imageBase64:b64, fileName:name }) });
+  const d = await r.json(); return d.success ? d.url : null;
 }
 
-function triggerInput(id) { document.getElementById(id).click(); }
-function openLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('open'); }
+// ── HELPERS ──────────────────────────────────────────────
+function tap(id)   { document.getElementById(id).click(); }
+function lb(src)   { document.getElementById('lightbox-img').src=src; document.getElementById('lightbox').classList.add('open'); }
 function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function x(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
 
-// ── INIT ─────────────────────────────────────────────────
-loadLocal();
+// ── BOOT ─────────────────────────────────────────────────
+load();
 renderHome();
-loadFromSheet();
+pullSheet();
 </script>
 </body>
 </html>
