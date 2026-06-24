@@ -20,6 +20,7 @@
   body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overscroll-behavior: none; }
   #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
 
+  /* HEADER */
   .header { display: flex; align-items: center; padding: calc(var(--safe-top) + 14px) 20px 14px; background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; gap: 12px; min-height: 56px; }
   .header-title { flex: 1; font-size: 16px; font-weight: 600; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .icon-btn { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; }
@@ -30,80 +31,101 @@
   .sync-dot.error { background: var(--danger); }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
+  /* PAGES */
   .page { display: none; flex: 1; padding: 20px 20px calc(var(--safe-bottom) + 32px); flex-direction: column; gap: 16px; overflow-y: auto; overflow-x: hidden; }
   .page.active { display: flex; }
 
+  /* HOME STATS */
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .stat-num { font-size: 32px; font-weight: 700; color: var(--accent); letter-spacing: -1px; }
   .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
 
+  /* BOX CARDS */
   .box-list { display: flex; flex-direction: column; gap: 8px; }
   .box-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; width: 100%; text-align: left; color: var(--text); cursor: pointer; }
+  .box-card:active { opacity: 0.8; }
   .box-card-main { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
-  .box-card:active .box-card-main { background: var(--surface2); }
-  .box-num { font-size: 12px; font-weight: 700; color: var(--accent); min-width: 42px; font-variant-numeric: tabular-nums; }
+  .box-num { font-size: 12px; font-weight: 700; color: var(--accent); min-width: 42px; }
   .box-label-text { flex: 1; font-size: 15px; font-weight: 500; }
   .box-meta { font-size: 12px; color: var(--muted); }
   .chevron { color: var(--muted); font-size: 14px; }
-
-  /* Box photo strip on home */
-  .box-photo-strip { display: flex; gap: 6px; padding: 0 16px 12px; overflow-x: auto; }
+  .box-photo-strip { display: flex; gap: 6px; padding: 0 16px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .box-photo-strip img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; cursor: pointer; }
 
+  /* BUTTONS */
   .btn-primary { width: 100%; padding: 15px; background: var(--accent); color: #0c0c0c; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 700; cursor: pointer; }
   .btn-primary:active { opacity: 0.85; }
   .btn-primary:disabled { opacity: 0.4; }
-  .btn-danger { width: 100%; padding: 13px; background: none; border: 1px solid #2a1a1a; border-radius: var(--radius); color: var(--danger); font-size: 14px; cursor: pointer; margin-top: 8px; }
+  .btn-secondary { width: 100%; padding: 13px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-secondary:active { background: var(--surface2); }
+  .btn-danger { width: 100%; padding: 13px; background: none; border: 1px solid #2a1a1a; border-radius: var(--radius); color: var(--danger); font-size: 14px; cursor: pointer; }
 
-  .input { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px; font-size: 16px; color: var(--text); width: 100%; outline: none; -webkit-appearance: none; }
+  /* INPUTS */
+  .input { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px; font-size: 16px; color: var(--text); width: 100%; outline: none; -webkit-appearance: none; font-family: inherit; }
   .input:focus { border-color: var(--accent); }
   .input::placeholder { color: var(--muted); }
   .input-row { display: flex; gap: 8px; }
   .input-row .input { flex: 1; }
+  textarea.input { resize: none; min-height: 80px; line-height: 1.5; }
 
-  /* Photo add area */
-  .photo-add-area { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-  .photo-add-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .photo-staged-strip { display: flex; gap: 8px; flex-wrap: wrap; }
-  .photo-staged-wrap { position: relative; width: 64px; height: 64px; }
-  .photo-staged-wrap img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: block; }
-  .photo-staged-del { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); border: 2px solid var(--bg); color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  /* PHOTO COMPONENTS */
+  .photo-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .photo-section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .photo-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+  .photo-wrap { position: relative; }
+  .photo-wrap img { border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: block; }
+  .photo-wrap .del-dot { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); border: 2px solid var(--bg); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 700; }
+  .photo-sm img { width: 64px; height: 64px; }
+  .photo-md img { width: 80px; height: 80px; }
   .photo-btns { display: flex; gap: 8px; }
   .btn-photo { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 8px; font-size: 13px; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-  .btn-photo:active { background: #2a2a2a; }
+  .btn-photo:active { opacity: 0.7; }
   .photo-input-hidden { display: none; }
 
-  /* Section label */
+  /* ITEM GROUP CARDS (on box page) */
+  .group-list { display: flex; flex-direction: column; gap: 8px; }
+  .group-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .group-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 14px; cursor: pointer; }
+  .group-card-header:active { background: var(--surface2); }
+  .group-card-name { flex: 1; font-size: 15px; font-weight: 500; }
+  .group-card-meta { font-size: 12px; color: var(--muted); }
+  .group-card-arrow { color: var(--muted); font-size: 14px; }
+  .group-card-thumb { width: 40px; height: 40px; border-radius: 7px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+  .group-del-btn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0; }
+  .group-del-btn:active { color: var(--danger); }
+
+  /* ITEM GROUP DETAIL PAGE */
+  .field-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+
+  /* SUBITEMS */
+  .subitem-list { display: flex; flex-direction: column; gap: 8px; }
+  .subitem-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .subitem-header { display: flex; align-items: center; gap: 10px; padding: 11px 12px; }
+  .subitem-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .subitem-photo-count { font-size: 12px; color: var(--muted); }
+  .subitem-expand-btn { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 2px 4px; }
+  .subitem-expand-btn:active { color: var(--accent); }
+  .subitem-del-btn { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 2px 4px; }
+  .subitem-del-btn:active { color: var(--danger); }
+  .subitem-body { border-top: 1px solid var(--border); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .subitem-body.hidden { display: none; }
+  .subitem-photos { display: flex; gap: 6px; flex-wrap: wrap; }
+  .subitem-photo-wrap { position: relative; }
+  .subitem-photo-wrap img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: block; }
+  .subitem-photo-wrap .del-dot { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; border-radius: 50%; background: var(--danger); border: 2px solid var(--bg); color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .subitem-add-photo-btns { display: flex; gap: 6px; }
+  .btn-photo-sm { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 12px; color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .btn-photo-sm:active { opacity: 0.7; }
+
+  /* MISC */
   .section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
-  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 0; }
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 32px 0; }
   .hint { font-size: 13px; color: var(--muted); line-height: 1.5; }
   .divider { height: 1px; background: var(--border); }
+  .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0 0; border-top: 1px solid var(--border); }
 
-  /* ITEM CARDS — clickable */
-  .item-list { display: flex; flex-direction: column; gap: 8px; }
-  .item-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; width: 100%; text-align: left; color: var(--text); }
-  .item-card:active { background: var(--surface2); }
-  .item-card-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
-  .item-card-thumb-count { width: 44px; height: 44px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); }
-  .item-card-body { flex: 1; min-width: 0; }
-  .item-card-name { font-size: 15px; font-weight: 500; }
-  .item-card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item-del-btn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0; }
-  .item-del-btn:active { color: var(--danger); }
-
-  /* ITEM DETAIL PAGE */
-  .item-detail-field { display: flex; flex-direction: column; gap: 6px; }
-  .item-detail-field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
-
-  /* Photo gallery in item detail */
-  .photo-gallery { display: flex; gap: 8px; flex-wrap: wrap; }
-  .photo-gallery-wrap { position: relative; width: 80px; height: 80px; }
-  .photo-gallery-wrap img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: block; }
-  .photo-gallery-del { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--danger); border: 2px solid var(--bg); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
-  /* Search */
+  /* SEARCH */
   .search-result { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; text-align: left; color: var(--text); width: 100%; margin-bottom: 8px; }
   .search-result:active { background: var(--surface2); }
   .result-badge { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 48px; flex-shrink: 0; }
@@ -111,17 +133,15 @@
   .result-sub { font-size: 12px; color: var(--muted); flex-shrink: 0; }
   .result-thumb { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
 
-  /* Lightbox */
+  /* LIGHTBOX */
   #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
   #lightbox.open { display: flex; }
   #lightbox img { max-width: 96vw; max-height: 88vh; border-radius: 10px; object-fit: contain; }
   #lightbox-close { position: absolute; top: calc(var(--safe-top) + 16px); right: 20px; background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 20px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-  /* Toast */
+  /* TOAST */
   #toast { position: fixed; bottom: calc(var(--safe-bottom) + 24px); left: 50%; transform: translateX(-50%) translateY(20px); background: #222; color: var(--text); padding: 10px 18px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.25s; z-index: 200; white-space: nowrap; border: 1px solid var(--border); pointer-events: none; }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0 0; border-top: 1px solid var(--border); margin-top: auto; }
 </style>
 </head>
 <body>
@@ -139,13 +159,13 @@
       <div class="stat-card"><span class="stat-num" id="stat-boxes">0</span><span class="stat-label">Boxes</span></div>
       <div class="stat-card"><span class="stat-num" id="stat-items">0</span><span class="stat-label">Items</span></div>
     </div>
-    <div class="box-list" id="box-list"><div class="empty">No boxes yet.<br>Add your first one below.</div></div>
+    <div class="box-list" id="box-list"><div class="empty">No boxes yet.</div></div>
     <button class="btn-primary" onclick="showPage('add-box')">+ New Box</button>
   </div>
 
   <!-- ADD BOX -->
   <div class="page" id="page-add-box">
-    <p class="hint">Give this box a short label — e.g. "Kitchen", "Books", "Cables & Tech"</p>
+    <p class="hint">Give this box a short label — e.g. "Kitchen", "Books", "Action Figures"</p>
     <input class="input" id="new-box-label" placeholder="Box label..." onkeydown="if(event.key==='Enter')createBox()">
     <button class="btn-primary" onclick="createBox()">Create Box</button>
   </div>
@@ -153,60 +173,72 @@
   <!-- BOX DETAIL -->
   <div class="page" id="page-box">
     <!-- Box photos -->
-    <div class="photo-add-area" id="box-photo-area">
-      <span class="photo-add-label">Box Photos</span>
-      <div class="photo-staged-strip" id="box-photos-strip"></div>
+    <div class="photo-section">
+      <span class="photo-section-label">Box Photos</span>
+      <div class="photo-grid photo-sm" id="box-photos-grid"></div>
       <div class="photo-btns">
-        <button class="btn-photo" onclick="triggerPhoto('box-camera')">📷 Camera</button>
-        <button class="btn-photo" onclick="triggerPhoto('box-library')">🖼 Library</button>
+        <button class="btn-photo" onclick="triggerInput('box-cam')">📷 Camera</button>
+        <button class="btn-photo" onclick="triggerInput('box-lib')">🖼 Library</button>
       </div>
-      <input class="photo-input-hidden" type="file" id="box-camera" accept="image/*" capture="environment" onchange="handleBoxPhoto(this)">
-      <input class="photo-input-hidden" type="file" id="box-library" accept="image/*" onchange="handleBoxPhoto(this)">
+      <input class="photo-input-hidden" type="file" id="box-cam" accept="image/*" capture="environment" onchange="handleBoxPhoto(this)">
+      <input class="photo-input-hidden" type="file" id="box-lib" accept="image/*" onchange="handleBoxPhoto(this)">
     </div>
 
     <div class="divider"></div>
 
-    <!-- Add item -->
+    <!-- Add item group -->
     <div class="input-row">
-      <input class="input" id="new-item-text" placeholder="Add item..." onkeydown="if(event.key==='Enter')addItem()">
-      <button class="btn-primary" style="width:auto;padding:13px 18px" id="add-item-btn" onclick="addItem()">Add</button>
+      <input class="input" id="new-group-text" placeholder='Add item or group, e.g. "Action Figures"...' onkeydown="if(event.key==='Enter')addGroup()">
+      <button class="btn-primary" style="width:auto;padding:13px 18px" id="add-group-btn" onclick="addGroup()">Add</button>
     </div>
 
-    <div class="item-list" id="item-list"><div class="empty">No items yet.</div></div>
+    <div class="group-list" id="group-list"><div class="empty">No items yet.</div></div>
     <button class="btn-danger" onclick="deleteCurrentBox()">Delete This Box</button>
   </div>
 
-  <!-- ITEM DETAIL -->
-  <div class="page" id="page-item">
-    <div class="item-detail-field">
-      <label>Item Name</label>
-      <input class="input" id="item-name-input" placeholder="Item name...">
+  <!-- ITEM GROUP DETAIL -->
+  <div class="page" id="page-group">
+    <div>
+      <div class="field-label">Name</div>
+      <input class="input" id="group-name-input" placeholder="Group name...">
     </div>
-    <div class="item-detail-field">
-      <label>Notes / Sub-details</label>
-      <textarea class="input" id="item-notes-input" placeholder="Add notes, condition, serial number, etc..."></textarea>
+    <div>
+      <div class="field-label">Notes</div>
+      <textarea class="input" id="group-notes-input" placeholder="Add notes, description, condition..."></textarea>
     </div>
 
-    <!-- Item photos -->
-    <div class="item-detail-field">
-      <label>Photos</label>
-      <div class="photo-gallery" id="item-photo-gallery"></div>
-      <div class="photo-btns" style="margin-top:8px">
-        <button class="btn-photo" onclick="triggerPhoto('item-camera')">📷 Camera</button>
-        <button class="btn-photo" onclick="triggerPhoto('item-library')">🖼 Library</button>
+    <!-- Group photos -->
+    <div class="photo-section">
+      <span class="photo-section-label">Photos</span>
+      <div class="photo-grid photo-md" id="group-photos-grid"></div>
+      <div class="photo-btns">
+        <button class="btn-photo" onclick="triggerInput('group-cam')">📷 Camera</button>
+        <button class="btn-photo" onclick="triggerInput('group-lib')">🖼 Library</button>
       </div>
-      <input class="photo-input-hidden" type="file" id="item-camera" accept="image/*" capture="environment" onchange="handleItemPhoto(this)">
-      <input class="photo-input-hidden" type="file" id="item-library" accept="image/*" onchange="handleItemPhoto(this)">
+      <input class="photo-input-hidden" type="file" id="group-cam" accept="image/*" capture="environment" onchange="handleGroupPhoto(this)">
+      <input class="photo-input-hidden" type="file" id="group-lib" accept="image/*" onchange="handleGroupPhoto(this)">
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Sub-items -->
+    <div>
+      <div class="field-label" style="margin-bottom:10px">Sub-items</div>
+      <div class="subitem-list" id="subitem-list"></div>
+      <div class="input-row" style="margin-top:10px">
+        <input class="input" id="new-subitem-text" placeholder='e.g. "Luke Skywalker #4"...' onkeydown="if(event.key==='Enter')addSubitem()">
+        <button class="btn-secondary" style="width:auto;padding:13px 16px" onclick="addSubitem()">Add</button>
+      </div>
     </div>
 
     <div class="save-bar">
-      <button class="btn-primary" onclick="saveItemDetail()">Save Changes</button>
+      <button class="btn-primary" onclick="saveGroup()">Save</button>
     </div>
   </div>
 
   <!-- SEARCH -->
   <div class="page" id="page-search">
-    <input class="input" id="search-input" placeholder="Search items or box names..." oninput="doSearch(this.value)">
+    <input class="input" id="search-input" placeholder="Search items, notes, sub-items..." oninput="doSearch(this.value)">
     <div id="search-results"></div>
   </div>
 </div>
@@ -219,8 +251,17 @@
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwC_KiAtO-WMq6WBj7Zcv9RywBsnVufLDOVn8JjZe7khTZxnf5CurqS8dteyMOgF1AE/exec";
-const STORAGE_KEY = "boxly-v2";
-let state = { boxes: [], activeBoxId: null, activeItemId: null, prevPage: 'home' };
+const STORAGE_KEY = "boxly-v3";
+
+// STATE
+let state = {
+  boxes: [],         // [{ id, num, label, photos:[], groups:[] }]
+                     // group: { id, name, notes, photos:[], subitems:[] }
+                     // subitem: { id, name, photos:[] }
+  activeBoxId: null,
+  activeGroupId: null,
+  prevPage: 'home'
+};
 
 // ── STORAGE ──────────────────────────────────────────────
 function saveLocal() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.boxes)); } catch {} }
@@ -236,23 +277,24 @@ async function syncPost(payload) {
   } catch { setSyncStatus('error'); toast('Sync failed — saved locally'); }
 }
 async function loadFromSheet() {
+  // Load from local first, then try sheet
   setSyncStatus('syncing');
   try {
     const res = await fetch(SCRIPT_URL + '?action=getAll');
     const data = await res.json();
-    if (data.success && data.items && data.items.length > 0) {
+    // Only overwrite if sheet has data and local is empty
+    if (data.success && data.items && data.items.length > 0 && state.boxes.length === 0) {
       const boxMap = {};
       data.items.forEach(row => {
         const num = parseInt(row.boxNum);
         if (!boxMap[num]) {
-          let bphotos = [];
-          try { bphotos = JSON.parse(row.boxPhotos || '[]'); } catch {}
-          boxMap[num] = { id: num, num, label: row.boxLabel, photos: bphotos, items: [] };
+          let bp = []; try { bp = JSON.parse(row.boxPhotos||'[]'); } catch {}
+          boxMap[num] = { id: num, num, label: row.boxLabel, photos: bp, groups: [] };
         }
         if (row.itemId) {
-          let photos = [];
-          try { photos = JSON.parse(row.photoUrls || '[]'); } catch { if (row.photoUrl) photos = [row.photoUrl]; }
-          boxMap[num].items.push({ id: row.itemId, text: row.itemText, notes: row.notes || '', photos });
+          let photos = []; try { photos = JSON.parse(row.photoUrls||'[]'); } catch {}
+          let subitems = []; try { subitems = JSON.parse(row.subitems||'[]'); } catch {}
+          boxMap[num].groups.push({ id: row.itemId, name: row.itemText, notes: row.notes||'', photos, subitems });
         }
       });
       state.boxes = Object.values(boxMap).sort((a,b) => a.num - b.num);
@@ -272,61 +314,47 @@ function showPage(name, prev) {
   const title = document.getElementById('header-title');
   const searchBtn = document.getElementById('search-icon-btn');
 
-  if (name === 'home') {
-    back.style.display='none'; searchBtn.style.display='';
-    title.textContent='📦 Boxly';
-  } else if (name === 'add-box') {
-    back.style.display=''; searchBtn.style.display='none';
-    title.textContent='New Box';
-    setTimeout(()=>document.getElementById('new-box-label').focus(),100);
-  } else if (name === 'box') {
-    back.style.display=''; searchBtn.style.display='';
-    const b = getActiveBox();
-    title.textContent = b ? `Box ${b.num} — ${b.label}` : 'Box';
-    renderBoxDetail();
-    setTimeout(()=>document.getElementById('new-item-text').focus(),100);
-  } else if (name === 'item') {
-    back.style.display=''; searchBtn.style.display='none';
-    renderItemDetail();
-  } else if (name === 'search') {
-    back.style.display=''; searchBtn.style.display='none';
-    title.textContent='Search';
-    document.getElementById('search-input').value='';
-    document.getElementById('search-results').innerHTML='';
-    setTimeout(()=>document.getElementById('search-input').focus(),100);
-  }
+  searchBtn.style.display = (name === 'home' || name === 'box') ? '' : 'none';
+  back.style.display = name === 'home' ? 'none' : '';
+
+  if (name === 'home') { title.textContent = '📦 Boxly'; }
+  else if (name === 'add-box') { title.textContent = 'New Box'; setTimeout(()=>document.getElementById('new-box-label').focus(),100); }
+  else if (name === 'box') { const b=getActiveBox(); title.textContent = b ? `Box ${b.num} — ${b.label}` : 'Box'; renderBoxDetail(); setTimeout(()=>document.getElementById('new-group-text').focus(),100); }
+  else if (name === 'group') { const b=getActiveBox(); title.textContent = b ? `Box ${b.num}` : 'Item'; renderGroupDetail(); }
+  else if (name === 'search') { title.textContent = 'Search'; document.getElementById('search-input').value=''; document.getElementById('search-results').innerHTML=''; setTimeout(()=>document.getElementById('search-input').focus(),100); }
 }
 
 function goBack() {
-  if (state.prevPage === 'item') { showPage('box', 'home'); return; }
-  showPage(state.prevPage || 'home');
+  if (state.prevPage === 'group') showPage('box', 'home');
+  else showPage(state.prevPage || 'home');
 }
 
-function getActiveBox() { return state.boxes.find(b => b.id === state.activeBoxId); }
-function getActiveItem() { const b = getActiveBox(); return b ? b.items.find(i => i.id === state.activeItemId) : null; }
+function getActiveBox() { return state.boxes.find(b => b.id === state.activeBoxId) || null; }
+function getActiveGroup() {
+  const box = getActiveBox();
+  return box ? (box.groups.find(g => g.id === state.activeGroupId) || null) : null;
+}
 
 // ── TOAST ────────────────────────────────────────────────
-function toast(msg) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
+function toast(msg) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2200); }
 
 // ── HOME ─────────────────────────────────────────────────
 function renderHome() {
+  const totalItems = state.boxes.reduce((a,b) => a + b.groups.length, 0);
   document.getElementById('stat-boxes').textContent = state.boxes.length;
-  document.getElementById('stat-items').textContent = state.boxes.reduce((a,b)=>a+b.items.length,0);
+  document.getElementById('stat-items').textContent = totalItems;
   const list = document.getElementById('box-list');
-  if (!state.boxes.length) { list.innerHTML='<div class="empty">No boxes yet.<br>Add your first one below.</div>'; return; }
-  list.innerHTML = state.boxes.slice().sort((a,b)=>a.num-b.num).map(b=>{
-    const photos = b.photos || [];
+  if (!state.boxes.length) { list.innerHTML='<div class="empty">No boxes yet.</div>'; return; }
+  list.innerHTML = state.boxes.slice().sort((a,b)=>a.num-b.num).map(b => {
+    const photos = b.photos||[];
     const strip = photos.length ? `<div class="box-photo-strip">${photos.map(u=>`<img src="${esc(u)}" onclick="event.stopPropagation();openLightbox('${esc(u)}')" loading="lazy">`).join('')}</div>` : '';
-    return `
-      <div class="box-card" onclick="openBox(${b.id})">
-        <div class="box-card-main">
-          <span class="box-num">#${b.num}</span>
-          <span class="box-label-text">${esc(b.label)}</span>
-          <span class="box-meta">${b.items.length} item${b.items.length!==1?'s':''}</span>
-          <span class="chevron">›</span>
-        </div>
-        ${strip}
-      </div>`;
+    return `<div class="box-card" onclick="openBox(${b.id})">
+      <div class="box-card-main">
+        <span class="box-num">#${b.num}</span>
+        <span class="box-label-text">${esc(b.label)}</span>
+        <span class="box-meta">${b.groups.length} item${b.groups.length!==1?'s':''}</span>
+        <span class="chevron">›</span>
+      </div>${strip}</div>`;
   }).join('');
 }
 function openBox(id) { state.activeBoxId=id; showPage('box','home'); }
@@ -336,9 +364,9 @@ function createBox() {
   const label = document.getElementById('new-box-label').value.trim();
   if (!label) return;
   const num = state.boxes.length ? Math.max(...state.boxes.map(b=>b.num))+1 : 1;
-  const box = { id: Date.now(), num, label, photos: [], items: [] };
+  const box = { id: Date.now(), num, label, photos:[], groups:[] };
   state.boxes.push(box); saveLocal(); renderHome();
-  document.getElementById('new-box-label').value = '';
+  document.getElementById('new-box-label').value='';
   state.activeBoxId = box.id;
   showPage('box','home');
   toast(`Box ${num} created`);
@@ -351,155 +379,214 @@ function renderBoxDetail() {
   document.getElementById('header-title').textContent = `Box ${box.num} — ${box.label}`;
 
   // Box photos
-  const strip = document.getElementById('box-photos-strip');
-  const photos = box.photos || [];
-  strip.innerHTML = photos.map((url,i)=>`
-    <div class="photo-staged-wrap">
+  const bg = document.getElementById('box-photos-grid');
+  bg.innerHTML = (box.photos||[]).map((url,i)=>`
+    <div class="photo-wrap photo-sm">
       <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" loading="lazy">
-      <div class="photo-staged-del" onclick="deleteBoxPhoto(${i})">✕</div>
+      <div class="del-dot" onclick="deleteBoxPhoto(${i})">✕</div>
     </div>`).join('');
 
-  // Items
-  const list = document.getElementById('item-list');
-  if (!box.items.length) { list.innerHTML='<div class="empty">No items yet.</div>'; return; }
-  list.innerHTML = box.items.map(item => {
-    const photos = item.photos || [];
-    let thumbHtml = '';
-    if (photos.length === 1) thumbHtml = `<img class="item-card-thumb" src="${esc(photos[0])}" loading="lazy">`;
-    else if (photos.length > 1) thumbHtml = `<div class="item-card-thumb-count">📷 ${photos.length}</div>`;
-    const sub = item.notes ? item.notes.substring(0,40)+(item.notes.length>40?'…':'') : (photos.length ? `${photos.length} photo${photos.length!==1?'s':''}` : '');
-    return `
-      <div style="display:flex;align-items:center;gap:8px">
-        <button class="item-card" style="flex:1" onclick="openItem('${esc(item.id)}')">
-          ${thumbHtml}
-          <div class="item-card-body">
-            <div class="item-card-name">${esc(item.text)}</div>
-            ${sub ? `<div class="item-card-sub">${esc(sub)}</div>` : ''}
-          </div>
-          <span style="color:var(--muted);font-size:14px">›</span>
-        </button>
-        <button class="item-del-btn" onclick="deleteItem('${esc(item.id)}')">✕</button>
-      </div>`;
+  // Groups
+  const list = document.getElementById('group-list');
+  if (!box.groups.length) { list.innerHTML='<div class="empty">No items yet.</div>'; return; }
+  list.innerHTML = box.groups.map(g => {
+    const photos = g.photos||[];
+    const subitems = g.subitems||[];
+    const thumb = photos[0] ? `<img class="group-card-thumb" src="${esc(photos[0])}" loading="lazy">` : '';
+    const meta = [
+      subitems.length ? `${subitems.length} sub-item${subitems.length!==1?'s':''}` : '',
+      photos.length ? `${photos.length} photo${photos.length!==1?'s':''}` : ''
+    ].filter(Boolean).join(' · ');
+    return `<div class="group-card">
+      <div class="group-card-header" onclick="openGroup('${esc(g.id)}')">
+        ${thumb}
+        <div style="flex:1;min-width:0">
+          <div class="group-card-name">${esc(g.name)}</div>
+          ${meta ? `<div class="group-card-meta">${meta}</div>` : ''}
+          ${g.notes ? `<div class="group-card-meta" style="margin-top:2px">${esc(g.notes.substring(0,50))}${g.notes.length>50?'…':''}</div>` : ''}
+        </div>
+        <span class="group-card-arrow">›</span>
+        <button class="group-del-btn" onclick="event.stopPropagation();deleteGroup('${esc(g.id)}')">✕</button>
+      </div>
+    </div>`;
   }).join('');
 }
 
 // ── BOX PHOTOS ───────────────────────────────────────────
-function triggerPhoto(inputId) { document.getElementById(inputId).click(); }
+function triggerInput(id) { document.getElementById(id).click(); }
 
 async function handleBoxPhoto(input) {
   const file = input.files[0]; if (!file) return;
-  const base64 = await compressImage(file);
   const box = getActiveBox(); if (!box) return;
-  if (!box.photos) box.photos = [];
-
-  toast('Uploading photo…');
+  toast('Uploading…');
   try {
-    const url = await uploadPhoto(base64, `box-${box.num}-${Date.now()}.jpg`);
-    if (url) {
-      box.photos.push(url);
-      saveLocal(); renderBoxDetail(); renderHome();
-      syncPost({ action:'updateBoxPhotos', boxNum:box.num, boxPhotos:JSON.stringify(box.photos) });
-      toast('Photo added');
-    }
+    const b64 = await compressImage(file);
+    const url = await uploadPhoto(b64, `box-${box.num}-${Date.now()}.jpg`);
+    if (url) { if(!box.photos)box.photos=[]; box.photos.push(url); saveLocal(); renderBoxDetail(); renderHome(); toast('Photo added'); }
   } catch { toast('Upload failed'); }
   input.value='';
 }
-
-function deleteBoxPhoto(index) {
+function deleteBoxPhoto(i) {
   const box = getActiveBox(); if (!box) return;
-  box.photos.splice(index,1);
-  saveLocal(); renderBoxDetail(); renderHome();
+  box.photos.splice(i,1); saveLocal(); renderBoxDetail(); renderHome();
   syncPost({ action:'updateBoxPhotos', boxNum:box.num, boxPhotos:JSON.stringify(box.photos) });
 }
 
-// ── ADD ITEM ─────────────────────────────────────────────
-async function addItem() {
-  const text = document.getElementById('new-item-text').value.trim();
-  if (!text) return;
+// ── ADD GROUP ────────────────────────────────────────────
+function addGroup() {
+  const name = document.getElementById('new-group-text').value.trim();
+  if (!name) return;
   const box = getActiveBox(); if (!box) return;
-  const btn = document.getElementById('add-item-btn');
-  btn.disabled=true; btn.textContent='…';
-  const itemId = Date.now().toString();
-  box.items.push({ id:itemId, text, notes:'', photos:[] });
-  saveLocal(); renderBoxDetail(); renderHome();
-  document.getElementById('new-item-text').value='';
-  btn.disabled=false; btn.textContent='Add';
+  const group = { id: Date.now().toString(), name, notes:'', photos:[], subitems:[] };
+  box.groups.push(group); saveLocal(); renderBoxDetail(); renderHome();
+  document.getElementById('new-group-text').value='';
   toast('Item added');
-  syncPost({ action:'addItem', boxNum:box.num, boxLabel:box.label, itemId, itemText:text, photoUrls:'[]', notes:'' });
+  syncPost({ action:'addItem', boxNum:box.num, boxLabel:box.label, itemId:group.id, itemText:name, notes:'', photoUrls:'[]', subitems:'[]' });
 }
 
-// ── ITEM DETAIL ──────────────────────────────────────────
-function openItem(itemId) {
-  state.activeItemId = itemId;
-  showPage('item','box');
+// ── GROUP DETAIL ─────────────────────────────────────────
+function openGroup(groupId) {
+  state.activeGroupId = groupId;
+  showPage('group','box');
 }
 
-function renderItemDetail() {
-  const item = getActiveItem(); if (!item) return;
-  const box = getActiveBox();
-  document.getElementById('header-title').textContent = box ? `Box ${box.num}` : 'Item';
-  document.getElementById('item-name-input').value = item.text;
-  document.getElementById('item-notes-input').value = item.notes || '';
+function renderGroupDetail() {
+  const group = getActiveGroup();
+  if (!group) return;
 
-  const gallery = document.getElementById('item-photo-gallery');
-  const photos = item.photos || [];
-  gallery.innerHTML = photos.map((url,i)=>`
-    <div class="photo-gallery-wrap">
+  document.getElementById('group-name-input').value = group.name;
+  document.getElementById('group-notes-input').value = group.notes||'';
+
+  // Photos
+  const pg = document.getElementById('group-photos-grid');
+  pg.innerHTML = (group.photos||[]).map((url,i)=>`
+    <div class="photo-wrap photo-md">
       <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" loading="lazy">
-      <div class="photo-gallery-del" onclick="deleteItemPhoto(${i})">✕</div>
+      <div class="del-dot" onclick="deleteGroupPhoto(${i})">✕</div>
     </div>`).join('');
+
+  // Sub-items
+  renderSubitems();
 }
 
-async function handleItemPhoto(input) {
+async function handleGroupPhoto(input) {
   const file = input.files[0]; if (!file) return;
-  const base64 = await compressImage(file);
-  const item = getActiveItem(); if (!item) return;
-  if (!item.photos) item.photos = [];
-  toast('Uploading photo…');
+  const group = getActiveGroup(); if (!group) return;
+  toast('Uploading…');
   try {
-    const url = await uploadPhoto(base64, `item-${item.id}-${Date.now()}.jpg`);
-    if (url) {
-      item.photos.push(url);
-      saveLocal(); renderItemDetail();
-      toast('Photo added');
-    }
+    const b64 = await compressImage(file);
+    const url = await uploadPhoto(b64, `group-${group.id}-${Date.now()}.jpg`);
+    if (url) { if(!group.photos)group.photos=[]; group.photos.push(url); saveLocal(); renderGroupDetail(); toast('Photo added'); }
+  } catch { toast('Upload failed'); }
+  input.value='';
+}
+function deleteGroupPhoto(i) {
+  const group = getActiveGroup(); if (!group) return;
+  group.photos.splice(i,1); saveLocal(); renderGroupDetail();
+}
+
+// ── SUB-ITEMS ────────────────────────────────────────────
+function renderSubitems() {
+  const group = getActiveGroup(); if (!group) return;
+  const list = document.getElementById('subitem-list');
+  if (!(group.subitems||[]).length) { list.innerHTML='<div class="empty" style="padding:16px 0">No sub-items yet.</div>'; return; }
+  list.innerHTML = group.subitems.map((si,idx) => {
+    const photos = si.photos||[];
+    const photosHtml = photos.map((url,pi)=>`
+      <div class="subitem-photo-wrap">
+        <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" loading="lazy">
+        <div class="del-dot" onclick="deleteSubitemPhoto('${esc(si.id)}',${pi})">✕</div>
+      </div>`).join('');
+    return `<div class="subitem-card" id="si-${esc(si.id)}">
+      <div class="subitem-header">
+        <span class="subitem-name">${esc(si.name)}</span>
+        ${photos.length ? `<span class="subitem-photo-count">📷 ${photos.length}</span>` : ''}
+        <button class="subitem-expand-btn" onclick="toggleSubitem('${esc(si.id)}')">⌄</button>
+        <button class="subitem-del-btn" onclick="deleteSubitem('${esc(si.id)}')">✕</button>
+      </div>
+      <div class="subitem-body hidden" id="sib-${esc(si.id)}">
+        <div class="subitem-photos">${photosHtml}</div>
+        <div class="subitem-add-photo-btns">
+          <button class="btn-photo-sm" onclick="triggerInput('si-cam-${esc(si.id)}')">📷 Camera</button>
+          <button class="btn-photo-sm" onclick="triggerInput('si-lib-${esc(si.id)}')">🖼 Library</button>
+        </div>
+        <input class="photo-input-hidden" type="file" id="si-cam-${esc(si.id)}" accept="image/*" capture="environment" onchange="handleSubitemPhoto(this,'${esc(si.id)}')">
+        <input class="photo-input-hidden" type="file" id="si-lib-${esc(si.id)}" accept="image/*" onchange="handleSubitemPhoto(this,'${esc(si.id)}')">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSubitem(siId) {
+  const body = document.getElementById('sib-'+siId);
+  const btn = body ? body.previousElementSibling.querySelector('.subitem-expand-btn') : null;
+  if (!body) return;
+  const hidden = body.classList.toggle('hidden');
+  if (btn) btn.textContent = hidden ? '⌄' : '⌃';
+}
+
+function addSubitem() {
+  const name = document.getElementById('new-subitem-text').value.trim();
+  if (!name) return;
+  const group = getActiveGroup(); if (!group) return;
+  if (!group.subitems) group.subitems=[];
+  group.subitems.push({ id: Date.now().toString(), name, photos:[] });
+  saveLocal(); renderSubitems();
+  document.getElementById('new-subitem-text').value='';
+}
+
+function deleteSubitem(siId) {
+  const group = getActiveGroup(); if (!group) return;
+  group.subitems = group.subitems.filter(s=>s.id!==siId);
+  saveLocal(); renderSubitems();
+}
+
+async function handleSubitemPhoto(input, siId) {
+  const file = input.files[0]; if (!file) return;
+  const group = getActiveGroup(); if (!group) return;
+  const si = group.subitems.find(s=>s.id===siId); if (!si) return;
+  toast('Uploading…');
+  try {
+    const b64 = await compressImage(file);
+    const url = await uploadPhoto(b64, `si-${siId}-${Date.now()}.jpg`);
+    if (url) { if(!si.photos)si.photos=[]; si.photos.push(url); saveLocal(); renderSubitems(); toast('Photo added'); }
   } catch { toast('Upload failed'); }
   input.value='';
 }
 
-function deleteItemPhoto(index) {
-  const item = getActiveItem(); if (!item) return;
-  item.photos.splice(index,1);
-  saveLocal(); renderItemDetail();
+function deleteSubitemPhoto(siId, pi) {
+  const group = getActiveGroup(); if (!group) return;
+  const si = group.subitems.find(s=>s.id===siId); if (!si) return;
+  si.photos.splice(pi,1); saveLocal(); renderSubitems();
 }
 
-function saveItemDetail() {
-  const item = getActiveItem(); if (!item) return;
+// ── SAVE GROUP ───────────────────────────────────────────
+function saveGroup() {
+  const group = getActiveGroup(); if (!group) return;
   const box = getActiveBox();
-  item.text = document.getElementById('item-name-input').value.trim() || item.text;
-  item.notes = document.getElementById('item-notes-input').value.trim();
+  group.name = document.getElementById('group-name-input').value.trim() || group.name;
+  group.notes = document.getElementById('group-notes-input').value.trim();
   saveLocal(); renderBoxDetail(); renderHome();
+  syncPost({ action:'updateItem', itemId:group.id, itemText:group.name, notes:group.notes, photoUrls:JSON.stringify(group.photos||[]), subitems:JSON.stringify(group.subitems||[]), boxNum:box?box.num:0, boxLabel:box?box.label:'' });
   toast('Saved');
-  syncPost({ action:'updateItem', itemId:item.id, itemText:item.text, notes:item.notes, photoUrls:JSON.stringify(item.photos||[]), boxNum:box?box.num:0, boxLabel:box?box.label:'' });
   showPage('box','home');
 }
 
-// ── DELETE ITEM ──────────────────────────────────────────
-function deleteItem(itemId) {
+// ── DELETE GROUP ─────────────────────────────────────────
+function deleteGroup(groupId) {
   const box = getActiveBox(); if (!box) return;
   if (!confirm('Remove this item?')) return;
-  box.items = box.items.filter(i => i.id !== itemId);
+  box.groups = box.groups.filter(g=>g.id!==groupId);
   saveLocal(); renderBoxDetail(); renderHome();
-  syncPost({ action:'deleteItem', itemId });
+  syncPost({ action:'deleteItem', itemId:groupId });
 }
 
 // ── DELETE BOX ───────────────────────────────────────────
 function deleteCurrentBox() {
   const box = getActiveBox(); if (!box) return;
   if (!confirm(`Delete Box ${box.num} — ${box.label}?`)) return;
-  state.boxes = state.boxes.filter(b => b.id !== state.activeBoxId);
-  state.activeBoxId = null;
-  saveLocal(); renderHome(); showPage('home');
+  state.boxes = state.boxes.filter(b=>b.id!==state.activeBoxId);
+  state.activeBoxId=null; saveLocal(); renderHome(); showPage('home');
   syncPost({ action:'deleteBox', boxNum:box.num });
   toast('Box deleted');
 }
@@ -509,61 +596,66 @@ function doSearch(q) {
   const container = document.getElementById('search-results');
   q = q.trim().toLowerCase();
   if (!q) { container.innerHTML=''; return; }
-  const itemHits=[], boxHits=[];
+  const groupHits=[], boxHits=[], subitemHits=[];
   state.boxes.forEach(b => {
     if (b.label.toLowerCase().includes(q)) boxHits.push(b);
-    b.items.forEach(item => { if (item.text.toLowerCase().includes(q) || (item.notes||'').toLowerCase().includes(q)) itemHits.push({box:b,item}); });
+    (b.groups||[]).forEach(g => {
+      if (g.name.toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)) groupHits.push({box:b,group:g});
+      (g.subitems||[]).forEach(si => { if(si.name.toLowerCase().includes(q)) subitemHits.push({box:b,group:g,si}); });
+    });
   });
-  if (!itemHits.length && !boxHits.length) { container.innerHTML=`<div class="empty">Nothing found for "${esc(q)}"</div>`; return; }
+  if (!groupHits.length&&!boxHits.length&&!subitemHits.length) { container.innerHTML=`<div class="empty">Nothing found for "${esc(q)}"</div>`; return; }
   let html='';
   if (boxHits.length) {
-    html += `<div class="section-label" style="margin-bottom:10px">Boxes</div>`;
-    html += boxHits.map(b=>`<button class="search-result" onclick="openBox(${b.id})"><span class="result-badge">Box ${b.num}</span><span class="result-text">${esc(b.label)}</span><span class="result-sub">${b.items.length} items</span></button>`).join('');
+    html+=`<div class="section-label" style="margin-bottom:10px">Boxes</div>`;
+    html+=boxHits.map(b=>`<button class="search-result" onclick="openBox(${b.id})"><span class="result-badge">Box ${b.num}</span><span class="result-text">${esc(b.label)}</span><span class="result-sub">${b.groups.length} items</span></button>`).join('');
   }
-  if (itemHits.length) {
-    html += `<div class="section-label" style="margin:${boxHits.length?'16px':0} 0 10px">Items</div>`;
-    html += itemHits.map(({box,item})=>{
-      const thumb = item.photos&&item.photos[0] ? `<img class="result-thumb" src="${esc(item.photos[0])}" loading="lazy">` : '';
-      return `<button class="search-result" onclick="openBox(${box.id})"><span class="result-badge">Box ${box.num}</span>${thumb}<span class="result-text">${esc(item.text)}</span><span class="result-sub">${esc(box.label)}</span></button>`;
+  if (groupHits.length) {
+    html+=`<div class="section-label" style="margin:${boxHits.length?'14px':0} 0 10px">Items</div>`;
+    html+=groupHits.map(({box,group})=>{
+      const thumb=group.photos&&group.photos[0]?`<img class="result-thumb" src="${esc(group.photos[0])}" loading="lazy">`:'';
+      return `<button class="search-result" onclick="openBox(${box.id})"><span class="result-badge">Box ${box.num}</span>${thumb}<span class="result-text">${esc(group.name)}</span><span class="result-sub">${esc(box.label)}</span></button>`;
     }).join('');
   }
-  container.innerHTML = html;
+  if (subitemHits.length) {
+    html+=`<div class="section-label" style="margin:${(boxHits.length||groupHits.length)?'14px':0} 0 10px">Sub-items</div>`;
+    html+=subitemHits.map(({box,group,si})=>{
+      const thumb=si.photos&&si.photos[0]?`<img class="result-thumb" src="${esc(si.photos[0])}" loading="lazy">`:'';
+      return `<button class="search-result" onclick="openBox(${box.id})"><span class="result-badge">Box ${box.num}</span>${thumb}<span class="result-text">${esc(si.name)}</span><span class="result-sub">${esc(group.name)}</span></button>`;
+    }).join('');
+  }
+  container.innerHTML=html;
 }
 
 // ── PHOTO UTILS ──────────────────────────────────────────
 function compressImage(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const MAX=1200; let w=img.width,h=img.height;
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=1200;let w=img.width,h=img.height;
         if(w>h&&w>MAX){h=h*MAX/w;w=MAX;}else if(h>MAX){w=w*MAX/h;h=MAX;}
-        const canvas=document.createElement('canvas');
-        canvas.width=w;canvas.height=h;
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        resolve(canvas.toDataURL('image/jpeg',0.78).split(',')[1]);
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',0.78).split(',')[1]);
       };
-      img.onerror = reject;
-      img.src = e.target.result;
+      img.onerror=reject; img.src=e.target.result;
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+    reader.onerror=reject; reader.readAsDataURL(file);
   });
 }
-
-async function uploadPhoto(base64, name) {
-  const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'uploadPhoto', imageBase64:base64, fileName:name }) });
-  const d = await res.json();
-  return d.success ? d.url : null;
+async function uploadPhoto(b64,name) {
+  const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'uploadPhoto',imageBase64:b64,fileName:name})});
+  const d=await res.json(); return d.success?d.url:null;
 }
 
 // ── LIGHTBOX ─────────────────────────────────────────────
-function openLightbox(src) { document.getElementById('lightbox-img').src=src; document.getElementById('lightbox').classList.add('open'); }
-function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
 // ── UTILS ────────────────────────────────────────────────
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ── INIT ─────────────────────────────────────────────────
 loadLocal(); renderHome(); loadFromSheet();
