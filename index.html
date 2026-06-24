@@ -530,7 +530,7 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
         </button>
         <button class="media-btn" onclick="tap('box-ai-scan')" id="box-scan-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          Scan AI
+          Scan
         </button>
       </div>
       <input class="fhidden" type="file" id="box-cam" accept="image/*" capture="environment" onchange="handleBoxPhoto(this)">
@@ -552,7 +552,7 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
     <div class="bar-row">
       <input class="bar-input" id="new-group-text" placeholder="Item or group name…" onkeydown="if(event.key==='Enter')addGroup()">
       <button class="bar-add" onclick="addGroup()">Add</button>
-      <button class="bar-scan" id="box-bar-scan" title="Scan room with AI" onclick="tap('box-ai-scan')">
+      <button class="bar-scan" id="box-bar-scan" title="Scan image with AI" onclick="tap('box-ai-scan')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       </button>
     </div>
@@ -589,7 +589,7 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
         </button>
         <button class="media-btn" onclick="tap('grp-ai-scan')" id="grp-scan-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          Scan AI
+          Scan
         </button>
       </div>
       <input class="fhidden" type="file" id="grp-cam" accept="image/*" capture="environment" onchange="handleGrpPhoto(this)">
@@ -878,11 +878,11 @@ function deleteCurrentBox(){
 // ── BOX AI SCAN ──────────────────────────────────────────
 async function handleBoxAI(input){
   const file=input.files[0];if(!file)return;
-  showLoading('Scanning room with AI…');
+  showLoading('Scanning image with AI…');
   try{
     const b64=await compress(file,1600);
     const b=B();
-    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:'items visible in this space'})});
+    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:'items visible in this image'})});
     const data=await res.json();
     if(!data.success||!data.items||!data.items.length){toast('No items detected — try a clearer photo');return;}
     S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
