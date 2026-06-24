@@ -743,7 +743,7 @@ function render(page) {
     setTimeout(()=>document.getElementById('new-box-label').focus(),80);
   }
   if(page==='box')     { const b=B(); title.textContent=b?`Box ${b.num} — ${b.label}`:'Box'; renderBox(); }
-  if(page==='group')   { const b=B(); title.textContent=b?b.label:'Item'; renderGroup(); }
+  if(page==='group')   { const g=G(); const b=B(); title.textContent=g?g.name:(b?b.label:'Item'); renderGroup(); }
   if(page==='search')  { title.textContent='Search'; document.getElementById('search-input').value=''; document.getElementById('search-results').innerHTML=''; setTimeout(()=>document.getElementById('search-input').focus(),80); }
 }
 
@@ -885,10 +885,12 @@ async function handleBoxAI(input){
     console.log('Image b64 length:',b64.length);
     const b=B();
     const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:'items'})});
-    const data=await res.json();
-    console.log('AI response:',JSON.stringify(data));
-    if(!data.success){toast('AI error: '+(data.error||'unknown'));return;}
-    if(!data.items||!data.items.length){toast('No items detected — try better lighting or a closer shot');return;}
+    const raw=await res.text();
+    console.log('AI raw response:',raw);
+    let data;
+    try{ data=JSON.parse(raw); }catch(e){ toast('Bad response: '+raw.substring(0,80)); return; }
+    if(!data.success){ toast('AI error: '+(data.error||JSON.stringify(data)).substring(0,100)); return; }
+    if(!data.items||!data.items.length){ toast('No items found in image'); return; }
     S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
     S.aiMode='box';
     document.getElementById('ai-sheet-title').textContent=`AI found ${data.items.length} items`;
@@ -944,10 +946,12 @@ async function handleGrpAI(input){
     const b64=await compress(file,800,0.65);
     console.log('b64 len:',b64.length);
     const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:g?g.name:'items'})});
-    const data=await res.json();
-    console.log('AI resp:',JSON.stringify(data));
-    if(!data.success){toast('AI error: '+(data.error||'unknown'));return;}
-    if(!data.items||!data.items.length){toast('No items detected — try better lighting');return;}
+    const raw=await res.text();
+    console.log('AI raw:',raw);
+    let data;
+    try{ data=JSON.parse(raw); }catch(e){ toast('Bad response: '+raw.substring(0,80)); return; }
+    if(!data.success){ toast('AI error: '+(data.error||JSON.stringify(data)).substring(0,100)); return; }
+    if(!data.items||!data.items.length){ toast('No items found in image'); return; }
     S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
     S.aiMode='group';
     document.getElementById('ai-sheet-title').textContent=`AI found ${data.items.length} sub-items`;
