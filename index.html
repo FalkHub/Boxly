@@ -880,18 +880,22 @@ async function handleBoxAI(input){
   const file=input.files[0];if(!file)return;
   showLoading('Scanning image with AI…');
   try{
-    const b64=await compress(file,1600);
+    // Keep image small — Apps Script URL fetch works best under 1MB base64
+    const b64=await compress(file,800,0.65);
+    console.log('Image b64 length:',b64.length);
     const b=B();
-    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:'items visible in this image'})});
+    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:'items'})});
     const data=await res.json();
-    if(!data.success||!data.items||!data.items.length){toast('No items detected — try a clearer photo');return;}
+    console.log('AI response:',JSON.stringify(data));
+    if(!data.success){toast('AI error: '+(data.error||'unknown'));return;}
+    if(!data.items||!data.items.length){toast('No items detected — try better lighting or a closer shot');return;}
     S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
     S.aiMode='box';
     document.getElementById('ai-sheet-title').textContent=`AI found ${data.items.length} items`;
     document.getElementById('ai-sheet-sub').textContent='Tap to deselect anything incorrect';
     renderAISheet();
     document.getElementById('ai-overlay').classList.add('open');
-  }catch(e){console.error(e);toast('AI scan failed: '+e.message);}
+  }catch(e){console.error('AI scan error:',e);toast('AI scan failed: '+e.message);}
   finally{hideLoading();input.value='';}
 }
 
@@ -937,10 +941,13 @@ async function handleGrpAI(input){
   const g=G();
   showLoading(`Scanning "${g?g.name:'items'}" with AI…`);
   try{
-    const b64=await compress(file,1600);
+    const b64=await compress(file,800,0.65);
+    console.log('b64 len:',b64.length);
     const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:g?g.name:'items'})});
     const data=await res.json();
-    if(!data.success||!data.items||!data.items.length){toast('No items detected — try a clearer photo');return;}
+    console.log('AI resp:',JSON.stringify(data));
+    if(!data.success){toast('AI error: '+(data.error||'unknown'));return;}
+    if(!data.items||!data.items.length){toast('No items detected — try better lighting');return;}
     S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
     S.aiMode='group';
     document.getElementById('ai-sheet-title').textContent=`AI found ${data.items.length} sub-items`;
@@ -1067,7 +1074,7 @@ async function uploadFile(b64, name) {
   return d.url;
 }
 
-function compress(file, maxPx=1200){
+function compress(file, maxPx=1200, quality=0.82){
   return new Promise((res,rej)=>{
     const reader=new FileReader();
     reader.onload=e=>{
@@ -1077,7 +1084,7 @@ function compress(file, maxPx=1200){
         if(w>h&&w>maxPx){h=h*maxPx/w;w=maxPx;}else if(h>maxPx){w=w*maxPx/h;h=maxPx;}
         const c=document.createElement('canvas');c.width=w;c.height=h;
         c.getContext('2d').drawImage(img,0,0,w,h);
-        res(c.toDataURL('image/jpeg',0.82).split(',')[1]);
+        res(c.toDataURL('image/jpeg',quality).split(',')[1]);
       };
       img.onerror=rej;img.src=e.target.result;
     };
