@@ -420,6 +420,15 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
 .empty p { font-size: 14px; color: var(--text2); line-height: 1.5; }
 
+/* ── DELETE LINK ─────────────────────────────────────── */
+.delete-box-link {
+  background: none; border: none; color: var(--text3);
+  font-size: 13px; cursor: pointer; padding: 6px 0 2px;
+  text-align: center; width: 100%; font-family: inherit;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.delete-box-link:active { color: var(--red); }
+
 /* ── DIVIDER ────────────────────────────────────────── */
 .divider { height: 1px; background: var(--border); }
 </style>
@@ -545,17 +554,17 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
       <div class="group-list" id="group-list"><div class="empty"><div class="empty-icon">🗂</div><p>No items yet.</p></div></div>
     </div>
 
-    <button class="btn btn-danger" onclick="deleteCurrentBox()">Delete This Box</button>
   </div>
 
   <div class="sticky-bar">
     <div class="bar-row">
-      <input class="bar-input" id="new-group-text" placeholder="Item or group name…" onkeydown="if(event.key==='Enter')addGroup()">
+      <input class="bar-input" id="new-group-text" placeholder="Item or group name…" onkeydown="if(event.key==='Enter')addGroup()" autofocus>
       <button class="bar-add" onclick="addGroup()">Add</button>
       <button class="bar-scan" id="box-bar-scan" title="Scan image with AI" onclick="tap('box-ai-scan')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       </button>
     </div>
+    <button class="delete-box-link" onclick="deleteCurrentBox()">Delete this box</button>
   </div>
 </div>
 
@@ -742,7 +751,7 @@ function render(page) {
     document.getElementById('new-box-priority').value = 'normal';
     setTimeout(()=>document.getElementById('new-box-label').focus(),80);
   }
-  if(page==='box')     { const b=B(); title.textContent=b?`Box ${b.num} — ${b.label}`:'Box'; renderBox(); }
+  if(page==='box')     { const b=B(); title.textContent=b?`Box ${b.num} — ${b.label}`:'Box'; renderBox(); setTimeout(()=>{ const inp=document.getElementById('new-group-text'); if(inp) inp.focus(); },80); }
   if(page==='group')   { const g=G(); const b=B(); title.textContent=g?g.name:(b?b.label:'Item'); renderGroup(); }
   if(page==='search')  { title.textContent='Search'; document.getElementById('search-input').value=''; document.getElementById('search-results').innerHTML=''; setTimeout(()=>document.getElementById('search-input').focus(),80); }
 }
