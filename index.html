@@ -420,6 +420,35 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
 .empty p { font-size: 14px; color: var(--text2); line-height: 1.5; }
 
+/* ── INLINE ADD ROW ──────────────────────────────────── */
+.inline-add-row {
+  display: flex; gap: 8px; align-items: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 6px 6px 6px 14px;
+  box-shadow: var(--shadow);
+}
+.inline-add-row .bar-input {
+  flex: 1; background: none; border: none; outline: none;
+  font-size: 15px; color: var(--text); font-family: inherit;
+  padding: 6px 0; box-shadow: none;
+}
+.inline-add-row .bar-input::placeholder { color: var(--text3); }
+.inline-add-row .bar-add {
+  background: var(--blue); color: #fff; border: none;
+  border-radius: var(--r-md); padding: 8px 14px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; font-family: inherit;
+}
+.inline-add-row .bar-add:active { opacity: 0.75; }
+.inline-add-row .bar-scan {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-md); width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--blue); flex-shrink: 0;
+}
+.inline-add-row .bar-scan:active { opacity: 0.7; }
+.inline-add-row .bar-scan svg { width: 16px; height: 16px; }
+
 /* ── DELETE LINK ─────────────────────────────────────── */
 .delete-box-link {
   background: none; border: none; color: var(--text3);
@@ -550,6 +579,14 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
     <!-- Items -->
     <div>
       <div class="sec-hdr"><span class="sec-title">Items in this box</span></div>
+      <div style="height:10px"></div>
+      <div class="inline-add-row">
+        <input class="bar-input" id="new-group-text-top" placeholder="Add item…" onkeydown="if(event.key==='Enter')addGroupFromTop()">
+        <button class="bar-add" onclick="addGroupFromTop()">Add</button>
+        <button class="bar-scan" title="Scan image with AI" onclick="tap('box-ai-scan')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </button>
+      </div>
       <div style="height:10px"></div>
       <div class="group-list" id="group-list"><div class="empty"><div class="empty-icon">🗂</div><p>No items yet.</p></div></div>
     </div>
@@ -867,6 +904,13 @@ async function handleBoxPhoto(input){
   input.value='';
 }
 function delBoxPhoto(i){const b=B();if(!b)return;b.photos.splice(i,1);save();renderBox();renderHome();push({action:'updateBoxPhotos',boxNum:b.num,boxPhotos:JSON.stringify(b.photos)});}
+function addGroupFromTop(){
+  const inp=document.getElementById('new-group-text-top');
+  if(!inp||!inp.value.trim()) return;
+  document.getElementById('new-group-text').value=inp.value;
+  inp.value='';
+  addGroup();
+}
 function addGroup(){
   const name=document.getElementById('new-group-text').value.trim();if(!name)return;
   const b=B();if(!b)return;
