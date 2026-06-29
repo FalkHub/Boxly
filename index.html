@@ -593,14 +593,7 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 
   </div>
 
-  <div class="sticky-bar">
-    <div class="bar-row">
-      <input class="bar-input" id="new-group-text" placeholder="Item or group name…" onkeydown="if(event.key==='Enter')addGroup()" autofocus>
-      <button class="bar-add" onclick="addGroup()">Add</button>
-      <button class="bar-scan" id="box-bar-scan" title="Scan image with AI" onclick="tap('box-ai-scan')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-      </button>
-    </div>
+  <div class="sticky-bar" style="padding-top:8px;padding-bottom:calc(var(--sab) + 8px)">
     <button class="delete-box-link" onclick="deleteCurrentBox()">Delete this box</button>
   </div>
 </div>
@@ -906,10 +899,14 @@ async function handleBoxPhoto(input){
 function delBoxPhoto(i){const b=B();if(!b)return;b.photos.splice(i,1);save();renderBox();renderHome();push({action:'updateBoxPhotos',boxNum:b.num,boxPhotos:JSON.stringify(b.photos)});}
 function addGroupFromTop(){
   const inp=document.getElementById('new-group-text-top');
-  if(!inp||!inp.value.trim()) return;
-  document.getElementById('new-group-text').value=inp.value;
-  inp.value='';
-  addGroup();
+  if(!inp) return;
+  const name=inp.value.trim(); if(!name) return;
+  const b=B(); if(!b) return;
+  const g={id:Date.now().toString(),name,notes:'',photos:[],subitems:[]};
+  b.groups.push(g); save(); renderBox(); renderHome();
+  inp.value=''; inp.focus();
+  toast('Item added');
+  push({action:'addItem',boxNum:b.num,boxLabel:b.label,itemId:g.id,itemText:name,notes:'',photoUrls:'[]',subitems:'[]',room:b.room||'',priority:b.priority||'normal'});
 }
 function addGroup(){
   const name=document.getElementById('new-group-text').value.trim();if(!name)return;
