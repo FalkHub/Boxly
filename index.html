@@ -120,7 +120,8 @@ body {
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 /* ── PAGES ──────────────────────────────────────────── */
-.page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--bg); }
+.page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--bg); height: 0; }
+.page.active { height: auto; }
 .page.active { display: block; }
 .pg { padding: 16px 16px calc(var(--sab) + 80px); display: flex; flex-direction: column; gap: 16px; }
 
