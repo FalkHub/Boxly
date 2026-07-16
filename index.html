@@ -1053,6 +1053,36 @@ function render(page) {
 }
 
 // ── HOME ─────────────────────────────────────────────────
+
+// ── TABS & TYPE ──────────────────────────────────────────
+function setTab(tab) {
+  S.activeTab = tab;
+  ['all','box','furniture','artwork'].forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if (el) el.classList.toggle('active', t===tab);
+  });
+  const labels = { all:'New Box', box:'New Box', furniture:'New Furniture', artwork:'New Artwork' };
+  const lbl = document.getElementById('new-entry-label');
+  if (lbl) lbl.textContent = labels[tab] || 'New Box';
+  renderHome();
+}
+
+function selectType(type) {
+  S.selectedType = type;
+  ['box','furniture','artwork'].forEach(t => {
+    const el = document.getElementById('type-'+t);
+    if (!el) return;
+    el.className = 'type-opt' + (t===type ? ' selected '+type : '');
+  });
+  const placeholders = {
+    box:       'e.g. "Books", "Kitchen", "Bedroom"',
+    furniture: 'e.g. "TV Console", "Dining Table", "Sofa"',
+    artwork:   'e.g. "Basquiat Print", "Warhol Poster"'
+  };
+  const inp = document.getElementById('new-box-label');
+  if (inp) inp.placeholder = placeholders[type] || '';
+}
+
 function renderHome() {
   const totalItems = S.boxes.reduce((a,b)=>a+b.groups.length,0);
   const totalSubs  = S.boxes.reduce((a,b)=>a+b.groups.reduce((c,g)=>c+(g.subitems||[]).length,0),0);
