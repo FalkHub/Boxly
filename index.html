@@ -461,6 +461,79 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 
 /* ── DIVIDER ────────────────────────────────────────── */
 .divider { height: 1px; background: var(--border); }
+
+/* ── EDITABLE TITLE ──────────────────────────────────── */
+.hdr-title-input {
+  flex: 1; background: none; border: none; outline: none;
+  font-size: 17px; font-weight: 600; letter-spacing: -0.4px;
+  color: var(--text); font-family: inherit; text-align: center;
+  border-bottom: 1.5px solid var(--blue); padding-bottom: 1px;
+}
+
+/* ── DIMENSION FIELD ─────────────────────────────────── */
+.dim-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 11px 14px; box-shadow: var(--shadow);
+}
+.dim-label { font-size: 14px; color: var(--text2); flex-shrink: 0; }
+.dim-inputs { display: flex; align-items: center; gap: 4px; flex: 1; }
+.dim-input {
+  width: 52px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 6px 8px; font-size: 14px;
+  color: var(--text); text-align: center; font-family: inherit; outline: none;
+}
+.dim-input:focus { border-color: var(--blue); }
+.dim-sep { font-size: 13px; color: var(--text3); }
+.dim-unit { font-size: 12px; color: var(--text3); flex-shrink: 0; }
+.dim-preset-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 6px 10px; font-size: 12px;
+  color: var(--blue); cursor: pointer; white-space: nowrap; font-family: inherit;
+}
+.dim-preset-btn:active { opacity: 0.7; }
+
+/* ── PRESET SHEET ────────────────────────────────────── */
+#preset-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: flex-end; justify-content: center; }
+#preset-overlay.open { display: flex; }
+.preset-sheet { background: var(--surface); border-radius: var(--r-xl) var(--r-xl) 0 0; width: 100%; max-width: 430px; max-height: 70vh; display: flex; flex-direction: column; padding-bottom: calc(var(--sab) + 8px); }
+.preset-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+.preset-hdr { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.preset-title { font-size: 16px; font-weight: 700; }
+.preset-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; }
+.preset-list { flex: 1; overflow-y: auto; padding: 10px 16px; display: flex; flex-direction: column; gap: 8px; }
+.preset-item { display: flex; align-items: center; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; cursor: pointer; }
+.preset-item:active { background: var(--bg); }
+.preset-name { flex: 1; font-size: 15px; font-weight: 500; }
+.preset-dims { font-size: 13px; color: var(--text2); }
+.preset-del { background: none; border: none; color: var(--text3); cursor: pointer; padding: 4px; font-size: 16px; }
+.preset-del:active { color: var(--red); }
+.preset-add-row { display: flex; gap: 8px; padding: 10px 16px 0; flex-wrap: wrap; }
+.preset-add-row .input { font-size: 14px; padding: 10px 12px; }
+
+/* ── MANIFEST SHEET ──────────────────────────────────── */
+#manifest-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: flex-end; justify-content: center; }
+#manifest-overlay.open { display: flex; }
+.manifest-sheet { background: var(--surface); border-radius: var(--r-xl) var(--r-xl) 0 0; width: 100%; max-width: 430px; padding-bottom: calc(var(--sab) + 16px); }
+.manifest-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+.manifest-hdr { padding: 12px 20px 16px; border-bottom: 1px solid var(--border); }
+.manifest-title { font-size: 17px; font-weight: 700; }
+.manifest-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+.manifest-options { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.manifest-opt {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 14px 16px; cursor: pointer;
+}
+.manifest-opt:active { opacity: 0.75; }
+.manifest-opt-icon { width: 40px; height: 40px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.manifest-opt-icon.blue { background: rgba(0,122,255,0.12); color: var(--blue); }
+.manifest-opt-icon.green { background: rgba(52,199,89,0.12); color: var(--green); }
+.manifest-opt-icon svg { width: 20px; height: 20px; }
+.manifest-opt-body { flex: 1; }
+.manifest-opt-title { font-size: 15px; font-weight: 600; }
+.manifest-opt-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
 </style>
 </head>
 <body>
@@ -474,6 +547,9 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   </button>
   <span class="hdr-title" id="hdr-title">📦 Boxly</span>
   <div class="sync-pill" id="sync-pill"><div class="sync-dot"></div><span id="sync-lbl">Sync</span></div>
+  <button class="hdr-btn" id="hdr-share" onclick="openManifest()" title="Share manifest" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+  </button>
   <button class="hdr-btn" id="hdr-search" onclick="navTo('search')" title="Search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
   </button>
@@ -522,6 +598,19 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
         <option value="store">📦 Storage Only</option>
       </select>
     </div>
+    <div class="field-lbl">Box Dimensions (inches)</div>
+    <div class="dim-row">
+      <span class="dim-label">L×W×H</span>
+      <div class="dim-inputs">
+        <input class="dim-input" id="new-box-l" type="number" placeholder="L">
+        <span class="dim-sep">×</span>
+        <input class="dim-input" id="new-box-w" type="number" placeholder="W">
+        <span class="dim-sep">×</span>
+        <input class="dim-input" id="new-box-h" type="number" placeholder="H">
+        <span class="dim-unit">in</span>
+      </div>
+      <button class="dim-preset-btn" onclick="openPresets('new-box')">Presets</button>
+    </div>
     <button class="btn btn-blue" onclick="createBox()">Create Box</button>
   </div>
 </div>
@@ -550,6 +639,22 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
       <div class="grouped-row">
         <span class="grouped-row-label">Box #</span>
         <input class="grouped-row-input" id="box-num-input" type="number" onchange="saveBoxMeta()">
+      </div>
+      <div class="grouped-row">
+        <span class="grouped-row-label">Name</span>
+        <input class="grouped-row-input" id="box-name-input" onchange="saveBoxMeta()" placeholder="Box name">
+      </div>
+      <div class="grouped-row" style="flex-wrap:wrap;gap:6px;padding:10px 16px">
+        <span class="grouped-row-label" style="width:100%">Dimensions (in)</span>
+        <div class="dim-inputs" style="flex:1">
+          <input class="dim-input" id="box-dim-l" type="number" placeholder="L" onchange="saveBoxMeta()">
+          <span class="dim-sep">×</span>
+          <input class="dim-input" id="box-dim-w" type="number" placeholder="W" onchange="saveBoxMeta()">
+          <span class="dim-sep">×</span>
+          <input class="dim-input" id="box-dim-h" type="number" placeholder="H" onchange="saveBoxMeta()">
+          <span class="dim-unit">in</span>
+        </div>
+        <button class="dim-preset-btn" onclick="openPresets('box')">Presets</button>
       </div>
     </div>
 
@@ -611,6 +716,21 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
       <div class="field-lbl">Notes</div>
       <div style="height:6px"></div>
       <textarea class="input" id="grp-notes" placeholder="Condition, description, serial number…"></textarea>
+    </div>
+    <div>
+      <div class="field-lbl">Dimensions (inches)</div>
+      <div style="height:6px"></div>
+      <div class="dim-row">
+        <span class="dim-label">L×W×H</span>
+        <div class="dim-inputs">
+          <input class="dim-input" id="grp-dim-l" type="number" placeholder="L">
+          <span class="dim-sep">×</span>
+          <input class="dim-input" id="grp-dim-w" type="number" placeholder="W">
+          <span class="dim-sep">×</span>
+          <input class="dim-input" id="grp-dim-h" type="number" placeholder="H">
+          <span class="dim-unit">in</span>
+        </div>
+      </div>
     </div>
 
     <!-- Group photos -->
@@ -688,6 +808,61 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   </div>
 </div>
 
+
+<!-- PRESET SHEET -->
+<div id="preset-overlay" onclick="if(event.target===this)closePresets()">
+  <div class="preset-sheet">
+    <div class="preset-handle"></div>
+    <div class="preset-hdr">
+      <span class="preset-title">Box Size Presets</span>
+      <button class="preset-close" onclick="closePresets()">✕</button>
+    </div>
+    <div class="preset-list" id="preset-list"></div>
+    <div class="preset-add-row">
+      <input class="input" id="preset-name-input" placeholder="Name (e.g. Medium Box)" style="flex:2">
+      <input class="dim-input" id="preset-l" type="number" placeholder="L" style="width:44px">
+      <span class="dim-sep">×</span>
+      <input class="dim-input" id="preset-w" type="number" placeholder="W" style="width:44px">
+      <span class="dim-sep">×</span>
+      <input class="dim-input" id="preset-h" type="number" placeholder="H" style="width:44px">
+      <button class="btn btn-blue btn-sm btn-inline" onclick="savePreset()" style="padding:10px 14px">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANIFEST SHEET -->
+<div id="manifest-overlay" onclick="if(event.target===this)closeManifest()">
+  <div class="manifest-sheet">
+    <div class="manifest-handle"></div>
+    <div class="manifest-hdr">
+      <div class="manifest-title">Share Manifest</div>
+      <div class="manifest-sub" id="manifest-sub">Loading…</div>
+    </div>
+    <div class="manifest-options">
+      <div class="manifest-opt" onclick="shareMoversText()">
+        <div class="manifest-opt-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="manifest-opt-body">
+          <div class="manifest-opt-title">Mover Summary</div>
+          <div class="manifest-opt-sub">Boxes + loose items with dimensions — text format</div>
+        </div>
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="manifest-opt" onclick="shareInventoryPDF()">
+        <div class="manifest-opt-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="manifest-opt-body">
+          <div class="manifest-opt-title">Full Inventory PDF</div>
+          <div class="manifest-opt-sub">Every box, item, sub-item — printable for move-in day</div>
+        </div>
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div id="loading-overlay">
   <div class="loading-card">
@@ -712,12 +887,16 @@ const ROOMS = ['Living Room','Bedroom','Kitchen','Bathroom','Office','Storage','
 const PRIORITIES = { normal: { label:'Normal', cls:'tag-normal' }, first: { label:'Open First', cls:'tag-first' }, store: { label:'Storage Only', cls:'tag-store' } };
 
 // ── STATE ────────────────────────────────────────────────
-let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box' };
+let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box', presets:[], presetTarget:null };
 let navStack = ['home'];
 
 // ── PERSIST ──────────────────────────────────────────────
 function save() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(S.boxes)); } catch {} }
-function load() { try { const r=localStorage.getItem(LOCAL_KEY); if(r) S.boxes=JSON.parse(r); } catch {} }
+function savePresets() { try { localStorage.setItem(LOCAL_KEY+'-presets', JSON.stringify(S.presets)); } catch {} }
+function load() {
+  try { const r=localStorage.getItem(LOCAL_KEY); if(r) S.boxes=JSON.parse(r); } catch {}
+  try { const p=localStorage.getItem(LOCAL_KEY+'-presets'); if(p) S.presets=JSON.parse(p); } catch {}
+}
 function B()    { return S.boxes.find(b=>b.id===S.activeBoxId)||null; }
 function G()    { const b=B(); return b?(b.groups.find(g=>g.id===S.activeGrpId)||null):null; }
 
@@ -769,6 +948,8 @@ function render(page) {
   const srch=document.getElementById('hdr-search');
   back.style.display  = navStack.length>1 ? 'flex':'none';
   srch.style.display  = ['home','box'].includes(page) ? 'flex':'none';
+  const shareBtn = document.getElementById('hdr-share');
+  if(shareBtn) shareBtn.style.display = page==='home' ? 'flex' : 'none';
 
   if(page==='home')    { title.textContent='📦 Boxly'; renderHome(); }
   if(page==='add-box') {
@@ -796,7 +977,7 @@ function renderHome() {
   document.getElementById('s-subitems').textContent = totalSubs;
   const el=document.getElementById('box-list');
   if(!S.boxes.length){el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap below to get started.</p></div>';return;}
-  el.innerHTML=S.boxes.slice().sort((a,b)=>a.num-b.num).map(b=>{
+  el.innerHTML=S.boxes.slice().sort((a,b)=>b.id-a.id).map(b=>{
     const ph=b.photos||[];
     const strip=ph.length?`<div class="box-photo-row">${ph.map(u=>`<img src="${x(u)}" onclick="event.stopPropagation();openLB('${x(u)}')" loading="lazy" onerror="this.style.display='none'">`).join('')}</div>`:'';
     const p=PRIORITIES[b.priority||'normal'];
@@ -811,6 +992,7 @@ function renderHome() {
           <div class="box-name">${x(b.label)}</div>
           <div class="box-meta">
             ${b.groups.length} item${b.groups.length!==1?'s':''}
+            ${b.dims&&(b.dims.l||b.dims.w||b.dims.h)?`<span style="color:var(--text3)">${b.dims.l||'?'}×${b.dims.w||'?'}×${b.dims.h||'?'} in</span>`:''}
             ${tags?'<span class="box-tags">'+tags+'</span>':''}
           </div>
         </div>
@@ -829,7 +1011,11 @@ function createBox(){
   const num=numVal?parseInt(numVal):nextNum;
   const room=document.getElementById('new-box-room').value;
   const priority=document.getElementById('new-box-priority').value||'normal';
-  const b={id:Date.now(),num,label,room,priority,photos:[],groups:[]};
+  const cl=document.getElementById('new-box-l').value;
+  const cw=document.getElementById('new-box-w').value;
+  const ch=document.getElementById('new-box-h').value;
+  const dims=(cl||cw||ch)?{l:cl,w:cw,h:ch}:null;
+  const b={id:Date.now(),num,label,room,priority,dims,photos:[],groups:[]};
   S.boxes.push(b); save();
   S.activeBoxId=b.id;
   navStack[navStack.length-1]='box';
@@ -845,6 +1031,11 @@ function renderBox(){
   document.getElementById('box-room-select').value=b.room||'';
   document.getElementById('box-priority-select').value=b.priority||'normal';
   document.getElementById('box-num-input').value=b.num;
+  document.getElementById('box-name-input').value=b.label||'';
+  const dims=b.dims||{};
+  document.getElementById('box-dim-l').value=dims.l||'';
+  document.getElementById('box-dim-w').value=dims.w||'';
+  document.getElementById('box-dim-h').value=dims.h||'';
 
   // Photos
   const grid=document.getElementById('box-photos-grid');
@@ -881,7 +1072,14 @@ function saveBoxMeta(){
   b.priority=document.getElementById('box-priority-select').value;
   const nv=document.getElementById('box-num-input').value;
   if(nv) b.num=parseInt(nv);
+  const nameVal=document.getElementById('box-name-input').value.trim();
+  if(nameVal) b.label=nameVal;
+  const l=document.getElementById('box-dim-l').value;
+  const w=document.getElementById('box-dim-w').value;
+  const h=document.getElementById('box-dim-h').value;
+  if(l||w||h) b.dims={l:l||'',w:w||'',h:h||''};
   save(); renderHome();
+  document.getElementById('hdr-title').textContent=`Box ${b.num} — ${b.label}`;
   push({action:'updateBoxMeta',boxNum:b.num,boxLabel:b.label,room:b.room,priority:b.priority});
 }
 
@@ -931,24 +1129,16 @@ async function handleBoxAI(input){
   const file=input.files[0];if(!file)return;
   showLoading('Scanning image with AI…');
   try{
-    // Keep image small — Apps Script URL fetch works best under 1MB base64
-    const b64=await compress(file,800,0.65);
-    console.log('Image b64 length:',b64.length);
-    const b=B();
-    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:'items'})});
-    const raw=await res.text();
-    console.log('AI raw response:',raw);
-    let data;
-    try{ data=JSON.parse(raw); }catch(e){ toast('Bad response: '+raw.substring(0,80)); return; }
-    if(!data.success){ toast('AI error: '+(data.error||JSON.stringify(data)).substring(0,100)); return; }
-    if(!data.items||!data.items.length){ toast('No items found in image'); return; }
-    S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
+    const b64=await compress(file,1200,0.75);
+    const items=await callClaudeVision(b64,'items in this image');
+    if(!items||!items.length){toast('No items detected — try a clearer photo');return;}
+    S.aiItems=items.map((name,i)=>({name,sel:true,id:i}));
     S.aiMode='box';
-    document.getElementById('ai-sheet-title').textContent=`AI found ${data.items.length} items`;
+    document.getElementById('ai-sheet-title').textContent=`AI found ${items.length} items`;
     document.getElementById('ai-sheet-sub').textContent='Tap to deselect anything incorrect';
     renderAISheet();
     document.getElementById('ai-overlay').classList.add('open');
-  }catch(e){console.error('AI scan error:',e);toast('AI scan failed: '+e.message);}
+  }catch(e){console.error(e);toast('AI error: '+e.message);}
   finally{hideLoading();input.value='';}
 }
 
@@ -959,6 +1149,10 @@ function renderGroup(){
   // Pre-populate name — this was the bug
   document.getElementById('grp-name').value=g.name;
   document.getElementById('grp-notes').value=g.notes||'';
+  const gd=g.dims||{};
+  document.getElementById('grp-dim-l').value=gd.l||'';
+  document.getElementById('grp-dim-w').value=gd.w||'';
+  document.getElementById('grp-dim-h').value=gd.h||'';
   const grid=document.getElementById('grp-photos-grid');
   const empty=document.getElementById('grp-photos-empty');
   const ph=g.photos||[];
@@ -983,6 +1177,10 @@ function saveGroup(){
   const g=G();if(!g)return;const b=B();
   g.name=document.getElementById('grp-name').value.trim()||g.name;
   g.notes=document.getElementById('grp-notes').value.trim();
+  const gl=document.getElementById('grp-dim-l').value;
+  const gw=document.getElementById('grp-dim-w').value;
+  const gh=document.getElementById('grp-dim-h').value;
+  if(gl||gw||gh) g.dims={l:gl||'',w:gw||'',h:gh||''};
   save();renderHome();
   push({action:'updateItem',itemId:g.id,itemText:g.name,notes:g.notes,photoUrls:JSON.stringify(g.photos||[]),subitems:JSON.stringify(g.subitems||[]),boxNum:b?b.num:0,boxLabel:b?b.label:''});
   toast('Saved');navBack();
@@ -992,24 +1190,18 @@ function saveGroup(){
 async function handleGrpAI(input){
   const file=input.files[0];if(!file)return;
   const g=G();
-  showLoading(`Scanning "${g?g.name:'items'}" with AI…`);
+  showLoading('Scanning image with AI…');
   try{
-    const b64=await compress(file,800,0.65);
-    console.log('b64 len:',b64.length);
-    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'scanWithAI',imageBase64:b64,groupName:g?g.name:'items'})});
-    const raw=await res.text();
-    console.log('AI raw:',raw);
-    let data;
-    try{ data=JSON.parse(raw); }catch(e){ toast('Bad response: '+raw.substring(0,80)); return; }
-    if(!data.success){ toast('AI error: '+(data.error||JSON.stringify(data)).substring(0,100)); return; }
-    if(!data.items||!data.items.length){ toast('No items found in image'); return; }
-    S.aiItems=data.items.map((name,i)=>({name,sel:true,id:i}));
+    const b64=await compress(file,1200,0.75);
+    const items=await callClaudeVision(b64,g?g.name:'items');
+    if(!items||!items.length){toast('No items detected — try a clearer photo');return;}
+    S.aiItems=items.map((name,i)=>({name,sel:true,id:i}));
     S.aiMode='group';
-    document.getElementById('ai-sheet-title').textContent=`AI found ${data.items.length} sub-items`;
+    document.getElementById('ai-sheet-title').textContent=`AI found ${items.length} sub-items`;
     document.getElementById('ai-sheet-sub').textContent='Tap to deselect anything incorrect';
     renderAISheet();
     document.getElementById('ai-overlay').classList.add('open');
-  }catch(e){console.error(e);toast('AI scan failed: '+e.message);}
+  }catch(e){console.error(e);toast('AI error: '+e.message);}
   finally{hideLoading();input.value='';}
 }
 
