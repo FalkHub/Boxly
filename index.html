@@ -1035,7 +1035,7 @@ function render(page) {
 
   if(page==='home')    { title.textContent='📦 Boxly'; renderHome(); }
   if(page==='add-box') {
-    const tabTitles = { box:'New Box', furniture:'New Furniture', artwork:'New Artwork' };
+    const tabTitles = { all:'New Box', box:'New Box', furniture:'New Furniture', artwork:'New Artwork' };
     title.textContent = tabTitles[S.activeTab||'box'];
     selectType(S.activeTab==='all' ? 'box' : (S.activeTab||'box'));
     // Pre-fill next box number
