@@ -1549,56 +1549,124 @@ function copyToClipboard(text) {
   }
 }
 
-function shareInventoryPDF() {
-  closeManifest(); showLoading('Generating PDF…');
-  setTimeout(() => {
-    try {
-      const win = window.open('','_blank');
-      if (!win) { toast('Allow popups to open PDF'); hideLoading(); return; }
-      win.document.write(buildPDFHTML());
-      win.document.close();
-      setTimeout(() => win.print(), 800);
-    } catch(e) { toast('PDF error: '+e.message); }
+async function shareInventoryPDF() {
+  closeManifest();
+  showLoading('Fetching photos…');
+  try {
+    const html = await buildPDFHTML();
     hideLoading();
-  }, 100);
+    showLoading('Generating PDF…');
+    const win = window.open('', '_blank');
+    if (!win) {
+      // Popup blocked — fallback: download as HTML file
+      const blob = new Blob([html], { type: 'text/html' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'moving-manifest-nyc.html';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('Saved as file — open in browser to print');
+    } else {
+      win.document.write(html);
+      win.document.close();
+      setTimeout(() => win.print(), 1000);
+    }
+  } catch(e) { toast('PDF error: ' + e.message); console.error(e); }
+  hideLoading();
 }
 
-function buildPDFHTML() {
+// Fetch a URL and return base64 data URI, or null if it fails
+async function urlToBase64(url) {
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror  = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
+
+async function buildPDFHTML() {
   const date = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const nyc  = S.boxes.filter(b=>b.priority==='first').sort((a,b)=>a.num-b.num);
+
+  // Collect all unique photo URLs
+  const allUrls = new Set();
+  nyc.forEach(b => {
+    (b.photos||[]).forEach(u => allUrls.add(u));
+    (b.groups||[]).forEach(g => {
+      (g.photos||[]).forEach(u => allUrls.add(u));
+      (g.subitems||[]).forEach(si => (si.photos||[]).forEach(u => allUrls.add(u)));
+    });
+  });
+
+  // Fetch all images in parallel and build a url→dataURI map
+  showLoading(`Fetching ${allUrls.size} photo${allUrls.size!==1?'s':''}…`);
+  const urlArr  = [...allUrls];
+  const b64Arr  = await Promise.all(urlArr.map(u => urlToBase64(u)));
+  const imgMap  = {};
+  urlArr.forEach((u, i) => { if (b64Arr[i]) imgMap[u] = b64Arr[i]; });
+
+  const img = (url, size=72) => {
+    const src = imgMap[url] || url;
+    return `<img src="${src}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:6px;border:1px solid #e5e5ea;margin:2px">`;
+  };
+
   const types = ['box','furniture','artwork'];
   const typeLabels = { box:'Boxes', furniture:'Furniture', artwork:'Artwork' };
   const typeIcons  = { box:'📦', furniture:'🛋', artwork:'🖼' };
   let rows = '';
+
   types.forEach(type => {
     const group = nyc.filter(b=>(b.type||'box')===type); if (!group.length) return;
     rows += `<div class="type-hdr">${typeIcons[type]} ${typeLabels[type]}</div>`;
+
     group.forEach(b => {
-      const dim = b.dims&&(b.dims.l||b.dims.w||b.dims.h)?`${b.dims.l||'?'}×${b.dims.w||'?'}×${b.dims.h||'?'}"` : '—';
+      const dim = b.dims&&(b.dims.l||b.dims.w||b.dims.h)
+        ? `${b.dims.l||'?'}×${b.dims.w||'?'}×${b.dims.h||'?'}"` : '—';
+      const boxPhotos = (b.photos||[]).map(u=>img(u,64)).join('');
+
       const itemRows = (b.groups||[]).map(g => {
-        const gd = g.dims&&(g.dims.l||g.dims.w||g.dims.h)?`${g.dims.l||'?'}×${g.dims.w||'?'}×${g.dims.h||'?'}"` : '';
-        const subs = (g.subitems||[]).map(si=>`<li>${si.name}</li>`).join('');
+        const gd   = g.dims&&(g.dims.l||g.dims.w||g.dims.h)
+          ? `${g.dims.l||'?'}×${g.dims.w||'?'}×${g.dims.h||'?'}"` : '';
+        const subs = (g.subitems||[]).map(si => {
+          const siPhotos = (si.photos||[]).map(u=>img(u,48)).join('');
+          return `<li>${si.name}${siPhotos?`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">${siPhotos}</div>`:''}</li>`;
+        }).join('');
+        const grpPhotos = (g.photos||[]).map(u=>img(u,72)).join('');
         return `<tr>
-          <td class="iname">${g.name}${gd?`<span class="dims"> ${gd}</span>`:''}</td>
-          <td>${g.notes||''}</td>
+          <td class="iname">
+            ${g.name}${gd?`<span class="dims"> ${gd}</span>`:''}
+            ${g.notes?`<div class="note">${g.notes}</div>`:''}
+            ${grpPhotos?`<div class="photo-row">${grpPhotos}</div>`:''}
+          </td>
           <td>${subs?`<ul>${subs}</ul>`:''}</td>
         </tr>`;
       }).join('');
+
       rows += `<div class="box-block">
         <div class="box-hdr">
           <span class="bnum">#${b.num}</span>
           <span class="bname">${b.label}</span>
           <span class="bdim">${dim}</span>
           ${b.room?`<span class="tag room">${b.room}</span>`:''}
+          ${boxPhotos?`<div class="box-photos">${boxPhotos}</div>`:''}
         </div>
         ${itemRows
-          ? `<table><thead><tr><th>Item</th><th>Notes</th><th>Sub-items</th></tr></thead><tbody>${itemRows}</tbody></table>`
+          ? `<table><thead><tr><th>Item / Photos</th><th>Sub-items</th></tr></thead><tbody>${itemRows}</tbody></table>`
           : '<p class="empty-box">No items recorded</p>'
         }
       </div>`;
     });
   });
+
   if (!rows) rows = '<p style="color:#aaa;padding:20px">No items marked Open First.</p>';
+
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Moving Manifest — NYC — ${date}</title>
 <style>
@@ -1607,24 +1675,28 @@ body{font-family:-apple-system,Helvetica,sans-serif;font-size:12px;color:#1c1c1e
 h1{font-size:20px;font-weight:700;margin-bottom:2px}
 .meta{color:#6c6c70;font-size:12px;margin-bottom:24px}
 .type-hdr{font-size:14px;font-weight:700;margin:22px 0 8px;padding-bottom:5px;border-bottom:2px solid #e5e5ea}
-.box-block{margin-bottom:12px;break-inside:avoid;border:1px solid #e5e5ea;border-radius:8px;overflow:hidden}
+.box-block{margin-bottom:14px;break-inside:avoid;border:1px solid #e5e5ea;border-radius:8px;overflow:hidden}
 .box-hdr{display:flex;align-items:center;gap:10px;background:#f2f2f7;padding:9px 12px;border-bottom:1px solid #e5e5ea;flex-wrap:wrap}
 .bnum{font-weight:800;font-size:12px;color:#8B6A3E}
 .bname{font-weight:600;font-size:13px;flex:1}
 .bdim{font-size:11px;color:#6c6c70}
+.box-photos{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;width:100%}
 table{width:100%;border-collapse:collapse}
 th{background:#fafafa;padding:7px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#6c6c70;border-bottom:1px solid #e5e5ea}
 td{padding:8px 10px;border-bottom:1px solid #f2f2f7;vertical-align:top;font-size:11px}
 tr:last-child td{border-bottom:none}
-.iname{font-weight:500}.dims{color:#6c6c70;font-weight:400}
-ul{padding-left:12px}li{margin-bottom:1px}
+.iname{font-weight:500;width:55%}
+.dims{color:#6c6c70;font-weight:400}
+.note{color:#6c6c70;margin-top:3px;font-style:italic}
+.photo-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+ul{padding-left:14px}li{margin-bottom:4px}
 .tag{font-size:9px;font-weight:600;padding:2px 5px;border-radius:8px}
 .room{background:#e8f4fd;color:#1a5276}
-.empty-box{padding:8px 12px;color:#aeaeb2;font-style:italic;font-size:11px}
+.empty-box{padding:8px 12px;color:#aeaeb2;font-style:italic}
 @media print{body{padding:16px}.box-block{break-inside:avoid}}
 </style></head><body>
 <h1>Moving Manifest — New York City</h1>
-<div class="meta">${date} · ${nyc.length} item${nyc.length!==1?'s':''} · Open First</div>
+<div class="meta">${date} · ${nyc.length} item${nyc.length!==1?'s':''} · Open First only</div>
 ${rows}
 </body></html>`;
 }
