@@ -463,6 +463,37 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 .divider { height: 1px; background: var(--border); }
 
 
+
+/* ── PDF PREVIEW ─────────────────────────────────────── */
+#pdf-body .pdf-type-hdr { font-size:15px;font-weight:700;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border);color:var(--text); }
+#pdf-body .pdf-box { background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:12px;overflow:hidden; }
+#pdf-body .pdf-box-hdr { background:var(--surface2);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--border); }
+#pdf-body .pdf-bnum { font-weight:800;font-size:12px;color:var(--accent); }
+#pdf-body .pdf-bname { font-weight:600;font-size:14px;flex:1; }
+#pdf-body .pdf-bdim { font-size:12px;color:var(--text2); }
+#pdf-body .pdf-box-photos { display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border2); }
+#pdf-body .pdf-box-photos img { width:72px;height:72px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border); }
+#pdf-body .pdf-item { padding:10px 14px;border-bottom:1px solid var(--border2); }
+#pdf-body .pdf-item:last-child { border-bottom:none; }
+#pdf-body .pdf-item-name { font-size:14px;font-weight:600; }
+#pdf-body .pdf-item-dim { font-size:12px;color:var(--text2);margin-top:2px; }
+#pdf-body .pdf-item-note { font-size:12px;color:var(--text2);margin-top:3px;font-style:italic; }
+#pdf-body .pdf-item-photos { display:flex;flex-wrap:wrap;gap:6px;margin-top:8px; }
+#pdf-body .pdf-item-photos img { width:80px;height:80px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border); }
+#pdf-body .pdf-subitems { margin-top:8px;padding-left:12px; }
+#pdf-body .pdf-sub { display:flex;align-items:flex-start;gap:8px;margin-bottom:6px; }
+#pdf-body .pdf-sub-dot { width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0;margin-top:5px; }
+#pdf-body .pdf-sub-name { font-size:12px;color:var(--text); }
+#pdf-body .pdf-sub-photos { display:flex;flex-wrap:wrap;gap:4px;margin-top:4px; }
+#pdf-body .pdf-sub-photos img { width:56px;height:56px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border); }
+#pdf-body .pdf-empty { text-align:center;padding:40px 20px;color:var(--text3);font-size:14px; }
+
+@media print {
+  .hdr, .sticky-bar, #page-pdf > div:first-child { display:none !important; }
+  #pdf-body { padding:0; }
+  #pdf-body .pdf-box { break-inside:avoid; border:1px solid #ccc; }
+}
+
 /* ── TABS ────────────────────────────────────────────── */
 .tabs {
   display: flex; gap: 0;
@@ -869,6 +900,16 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   </div>
 </div>
 
+<!-- PDF PREVIEW PAGE -->
+<div class="page" id="page-pdf">
+  <div style="position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px calc(12px);display:flex;gap:8px;align-items:center">
+    <button class="btn btn-ghost btn-sm btn-inline" onclick="navBack()" style="flex-shrink:0">← Back</button>
+    <span style="flex:1;font-size:14px;font-weight:600;text-align:center">NYC Manifest</span>
+    <button class="btn btn-blue btn-sm btn-inline" onclick="printPDF()" style="flex-shrink:0">🖨 Print</button>
+  </div>
+  <div id="pdf-body" style="padding:20px 16px calc(var(--sab) + 40px);background:var(--bg)"></div>
+</div>
+
 </div><!-- /app -->
 
 <!-- AI SHEET -->
@@ -1049,6 +1090,12 @@ function render(page) {
   }
   if(page==='box')     { const b=B(); title.textContent=b?`Box ${b.num} — ${b.label}`:'Box'; renderBox(); setTimeout(()=>{ const inp=document.getElementById('new-group-text'); if(inp) inp.focus(); },80); }
   if(page==='group')   { const g=G(); const b=B(); title.textContent=g?g.name:(b?b.label:'Item'); renderGroup(); }
+  if(page==='pdf') {
+    back.style.display='flex'; srch.style.display='none';
+    title.textContent='NYC Manifest';
+    const shareBtn=document.getElementById('hdr-share');
+    if(shareBtn) shareBtn.style.display='none';
+  }
   if(page==='search')  { title.textContent='Search'; document.getElementById('search-input').value=''; document.getElementById('search-results').innerHTML=''; setTimeout(()=>document.getElementById('search-input').focus(),80); }
 }
 
@@ -1553,27 +1600,95 @@ async function shareInventoryPDF() {
   closeManifest();
   showLoading('Fetching photos…');
   try {
-    const html = await buildPDFHTML();
-    hideLoading();
-    showLoading('Generating PDF…');
-    const win = window.open('', '_blank');
-    if (!win) {
-      // Popup blocked — fallback: download as HTML file
-      const blob = new Blob([html], { type: 'text/html' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url; a.download = 'moving-manifest-nyc.html';
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast('Saved as file — open in browser to print');
-    } else {
-      win.document.write(html);
-      win.document.close();
-      setTimeout(() => win.print(), 1000);
-    }
-  } catch(e) { toast('PDF error: ' + e.message); console.error(e); }
+    await renderPDFPreview();
+    navTo('pdf');
+  } catch(e) { toast('Error: '+e.message); console.error(e); }
   hideLoading();
+}
+
+function printPDF() { window.print(); }
+
+async function renderPDFPreview() {
+  const nyc = S.boxes.filter(b=>b.priority==='first').sort((a,b)=>a.num-b.num);
+  const container = document.getElementById('pdf-body');
+
+  if (!nyc.length) {
+    container.innerHTML = '<div class="pdf-empty">No items marked Open First yet.</div>';
+    return;
+  }
+
+  // Collect all photo URLs
+  const allUrls = new Set();
+  nyc.forEach(b => {
+    (b.photos||[]).forEach(u=>allUrls.add(u));
+    (b.groups||[]).forEach(g=>{
+      (g.photos||[]).forEach(u=>allUrls.add(u));
+      (g.subitems||[]).forEach(si=>(si.photos||[]).forEach(u=>allUrls.add(u)));
+    });
+  });
+
+  // Fetch all photos in parallel
+  const urlArr = [...allUrls];
+  showLoading(`Loading ${urlArr.length} photo${urlArr.length!==1?'s':''}…`);
+  const b64Arr = await Promise.all(urlArr.map(u=>urlToBase64(u)));
+  const imgMap = {};
+  urlArr.forEach((u,i)=>{ if(b64Arr[i]) imgMap[u]=b64Arr[i]; });
+
+  const imgEl = (url, cls) => {
+    const src = imgMap[url] || url;
+    return `<img src="${src}" onerror="this.style.display='none'">`;
+  };
+
+  const types = ['box','furniture','artwork'];
+  const typeLabels = { box:'📦 Boxes', furniture:'🛋 Furniture', artwork:'🖼 Artwork' };
+  let html = '';
+
+  types.forEach(type => {
+    const group = nyc.filter(b=>(b.type||'box')===type);
+    if (!group.length) return;
+    html += `<div class="pdf-type-hdr">${typeLabels[type]}</div>`;
+
+    group.forEach(b => {
+      const dim = b.dims&&(b.dims.l||b.dims.w||b.dims.h)
+        ? `${b.dims.l||'?'}×${b.dims.w||'?'}×${b.dims.h||'?'}"` : '';
+      const boxPhotos = (b.photos||[]).map(u=>imgEl(u)).join('');
+      const items = (b.groups||[]).map(g => {
+        const gd = g.dims&&(g.dims.l||g.dims.w||g.dims.h)
+          ? `${g.dims.l||'?'}×${g.dims.w||'?'}×${g.dims.h||'?'}"` : '';
+        const grpPhotos = (g.photos||[]).map(u=>imgEl(u)).join('');
+        const subs = (g.subitems||[]).map(si=>{
+          const siPhotos = (si.photos||[]).map(u=>imgEl(u)).join('');
+          return `<div class="pdf-sub">
+            <div class="pdf-sub-dot"></div>
+            <div>
+              <div class="pdf-sub-name">${x(si.name)}</div>
+              ${siPhotos?`<div class="pdf-sub-photos">${siPhotos}</div>`:''}
+            </div>
+          </div>`;
+        }).join('');
+        return `<div class="pdf-item">
+          <div class="pdf-item-name">${x(g.name)}</div>
+          ${gd?`<div class="pdf-item-dim">${gd}</div>`:''}
+          ${g.notes?`<div class="pdf-item-note">${x(g.notes)}</div>`:''}
+          ${grpPhotos?`<div class="pdf-item-photos">${grpPhotos}</div>`:''}
+          ${subs?`<div class="pdf-subitems">${subs}</div>`:''}
+        </div>`;
+      }).join('');
+
+      html += `<div class="pdf-box">
+        <div class="pdf-box-hdr">
+          <span class="pdf-bnum">#${b.num}</span>
+          <span class="pdf-bname">${x(b.label)}</span>
+          ${dim?`<span class="pdf-bdim">${dim}</span>`:''}
+          ${b.room?`<span class="tag tag-room">${x(b.room)}</span>`:''}
+        </div>
+        ${boxPhotos?`<div class="pdf-box-photos">${boxPhotos}</div>`:''}
+        ${items||'<div class="pdf-item" style="color:var(--text3);font-style:italic">No items recorded</div>'}
+      </div>`;
+    });
+  });
+
+  container.innerHTML = html;
 }
 
 // Fetch a URL and return base64 data URI, or null if it fails
