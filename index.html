@@ -465,6 +465,28 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 
 
 /* ── PDF PREVIEW ─────────────────────────────────────── */
+.pdf-toolbar {
+  position:sticky; top:0; z-index:50;
+  background:var(--bg); border-bottom:1px solid var(--border);
+  padding:10px 16px; display:flex; gap:8px; align-items:center;
+}
+/* Make page-pdf not clip content */
+#page-pdf { overflow:visible !important; height:auto !important; }
+
+@media print {
+  /* Hide everything except pdf content */
+  .hdr, .pdf-toolbar, #page-home, #page-add-box, #page-box,
+  #page-group, #page-search, #ai-overlay, #manifest-overlay,
+  #preset-overlay, #loading-overlay, #lb, #toast { display:none !important; }
+  #page-pdf { display:block !important; height:auto !important; overflow:visible !important; }
+  #pdf-body { padding:0 !important; }
+  body { background:#fff !important; color:#000 !important; }
+  #pdf-body .pdf-box { break-inside:avoid; border:1px solid #ccc !important; }
+  #pdf-body .pdf-type-hdr { border-bottom:2px solid #ccc !important; color:#000 !important; }
+  #pdf-body .pdf-box-hdr { background:#f5f5f5 !important; }
+  #pdf-body .pdf-item { border-bottom:1px solid #eee !important; }
+}
+
 #pdf-body .pdf-type-hdr { font-size:15px;font-weight:700;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border);color:var(--text); }
 #pdf-body .pdf-box { background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:12px;overflow:hidden; }
 #pdf-body .pdf-box-hdr { background:var(--surface2);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--border); }
@@ -901,13 +923,13 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 </div>
 
 <!-- PDF PREVIEW PAGE -->
-<div class="page" id="page-pdf">
-  <div style="position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px calc(12px);display:flex;gap:8px;align-items:center">
+<div class="page" id="page-pdf" style="overflow:visible;height:auto;min-height:100vh">
+  <div class="pdf-toolbar">
     <button class="btn btn-ghost btn-sm btn-inline" onclick="navBack()" style="flex-shrink:0">← Back</button>
     <span style="flex:1;font-size:14px;font-weight:600;text-align:center">NYC Manifest</span>
     <button class="btn btn-blue btn-sm btn-inline" onclick="printPDF()" style="flex-shrink:0">🖨 Print</button>
   </div>
-  <div id="pdf-body" style="padding:20px 16px calc(var(--sab) + 40px);background:var(--bg)"></div>
+  <div id="pdf-body" style="padding:16px 16px calc(var(--sab) + 60px)"></div>
 </div>
 
 </div><!-- /app -->
@@ -1606,7 +1628,28 @@ async function shareInventoryPDF() {
   hideLoading();
 }
 
-function printPDF() { window.print(); }
+function printPDF() {
+  // Temporarily make the page non-scrolling so iOS print captures everything
+  const page = document.getElementById('page-pdf');
+  const body = document.getElementById('pdf-body');
+  const origPageStyle  = page.getAttribute('style') || '';
+  const origBodyStyle  = body.getAttribute('style') || '';
+
+  // Expand everything to natural height
+  page.style.cssText = 'display:block;height:auto;overflow:visible;position:relative';
+  body.style.cssText = 'padding:16px;height:auto;overflow:visible';
+  document.body.style.overflow = 'visible';
+
+  setTimeout(() => {
+    window.print();
+    // Restore after print dialog
+    setTimeout(() => {
+      page.setAttribute('style', origPageStyle);
+      body.setAttribute('style', origBodyStyle);
+      document.body.style.overflow = '';
+    }, 1000);
+  }, 150);
+}
 
 async function renderPDFPreview() {
   const nyc = S.boxes.filter(b=>b.priority==='first').sort((a,b)=>a.num-b.num);
