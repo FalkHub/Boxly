@@ -754,6 +754,7 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         <span id="new-entry-label">New Box</span>
       </button>
+        <button class="btn btn-ghost" onclick="openSortSheet()" style="width:auto;padding:14px 16px;flex-shrink:0" title="Sort"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg></button>
       <div style="height:12px"></div>
       <div class="box-list" id="box-list"><div class="empty"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap above to get started.</p></div></div>
     </div>
@@ -1117,8 +1118,8 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   <div class="manifest-sheet">
     <div class="manifest-handle"></div>
     <div class="manifest-hdr">
-      <div class="manifest-title">Share Manifest</div>
-      <div class="manifest-sub" id="manifest-sub">Loading…</div>
+      <div class="manifest-title">Export</div>
+      <div class="manifest-sub">Choose what to include</div>
     </div>
     <div class="manifest-options">
       <div class="manifest-opt" onclick="shareMoversText()">
@@ -1126,7 +1127,7 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
         <div class="manifest-opt-body">
-          <div class="manifest-opt-title">NYC Mover Summary</div>
+          <div class="manifest-opt-title">Mover Summary (Text)</div>
           <div class="manifest-opt-sub">Open First items only — boxes, furniture, artwork with dimensions</div>
         </div>
         <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1136,7 +1137,7 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         </div>
         <div class="manifest-opt-body">
-          <div class="manifest-opt-title">NYC Inventory PDF</div>
+          <div class="manifest-opt-title">Full Inventory (PDF)</div>
           <div class="manifest-opt-sub">Open First items — printable checklist for move-in day</div>
         </div>
         <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1547,9 +1548,9 @@ function renderHome() {
   const filtered = (tab === 'all'
     ? S.boxes.slice()
     : S.boxes.filter(b=>(b.type||'box')===tab)
-  ).filter(b => !S.activeDestFilter || (b.dest||'')=== S.activeDestFilter)
-   .sort((a,b)=>b.id-a.id);
+  ).filter(b => !S.activeDestFilter || (b.dest||'')=== S.activeDestFilter);
 
+  const filtered = (typeof applySortToList === 'function') ? applySortToList(preFiltered) : preFiltered.sort((a,b)=>b.id-a.id);
   // Render destination filter pills
   renderDestFilterRow();
   const el=document.getElementById('box-list');
@@ -2248,6 +2249,133 @@ ul{padding-left:14px}li{margin-bottom:4px}
 <div class="meta">${date} · ${nyc.length} item${nyc.length!==1?'s':''} · Open First only</div>
 ${rows}
 </body></html>`;
+}
+
+
+// ── SORT ─────────────────────────────────────────────────
+let sortMode = 'newest';
+function setSortMode(m){sortMode=m;closeSortSheet();renderHome();}
+function openSortSheet(){
+  const opts=[{val:'newest',label:'Newest first'},{val:'oldest',label:'Oldest first'},{val:'num-asc',label:'Box # low → high'},{val:'num-desc',label:'Box # high → low'},{val:'alpha',label:'Alphabetical'},{val:'dest',label:'By destination'}];
+  document.getElementById('sort-sheet-options').innerHTML=opts.map(o=>`<button class="bulk-opt${sortMode===o.val?' selected':''}" onclick="setSortMode('${o.val}')">${o.label}</button>`).join('');
+  document.getElementById('sort-overlay').classList.add('open');
+}
+function closeSortSheet(){document.getElementById('sort-overlay').classList.remove('open');}
+function applySortToList(arr){
+  const a=arr.slice();
+  if(sortMode==='newest') return a.sort((x,y)=>y.id-x.id);
+  if(sortMode==='oldest') return a.sort((x,y)=>x.id-y.id);
+  if(sortMode==='num-asc') return a.sort((x,y)=>x.num-y.num);
+  if(sortMode==='num-desc') return a.sort((x,y)=>y.num-x.num);
+  if(sortMode==='alpha') return a.sort((x,y)=>x.label.localeCompare(y.label));
+  if(sortMode==='dest') return a.sort((x,y)=>(x.dest||'').localeCompare(y.dest||''));
+  return a;
+}
+
+// ── EXPORT ────────────────────────────────────────────────
+let exportFilters={destinations:[],types:[],priorities:[]};
+function openManifest(){
+  exportFilters={destinations:S.activeDestFilter?[S.activeDestFilter]:[],types:S.activeTab!=='all'?[S.activeTab]:[],priorities:[]};
+  renderExportSheet();
+  document.getElementById('manifest-overlay').classList.add('open');
+}
+function closeManifest(){document.getElementById('manifest-overlay').classList.remove('open');}
+function getExportItems(){
+  return S.boxes.filter(b=>{
+    const dm=!exportFilters.destinations.length||exportFilters.destinations.includes(b.dest||'');
+    const tm=!exportFilters.types.length||exportFilters.types.includes(b.type||'box');
+    const pm=!exportFilters.priorities.length||exportFilters.priorities.includes(b.priority||'normal');
+    return dm&&tm&&pm;
+  });
+}
+function toggleExportFilter(key,val){
+  if(!val){exportFilters[key]=[];}
+  else{const arr=exportFilters[key],i=arr.indexOf(val);if(i>-1)arr.splice(i,1);else arr.push(val);}
+  renderExportSheet();
+}
+function renderExportSheet(){
+  const matching=getExportItems();
+  const destBtns=['', ...S.destinations].map(d=>{
+    const sel=!d?!exportFilters.destinations.length:exportFilters.destinations.includes(d);
+    const dc=d?destColor(d):null;
+    const sty=sel&&dc?`background:${dc.bg};color:${dc.color};border-color:${dc.color}`:sel?'border-color:var(--blue);color:var(--blue);background:rgba(0,122,255,0.08)':'';
+    return `<button class="export-chip${sel?' sel':''}" style="${sty}" onclick="toggleExportFilter('destinations','${x(d)}')">${d||'All destinations'}</button>`;
+  }).join('');
+  const typeOpts=[['','All'],['box','📦 Boxes'],['furniture','🛋 Furniture'],['artwork','🖼 Artwork']];
+  const typeBtns=typeOpts.map(([v,l])=>`<button class="export-chip${(!v&&!exportFilters.types.length)||exportFilters.types.includes(v)?' sel':''}" onclick="toggleExportFilter('types','${v}')">${l}</button>`).join('');
+  const priOpts=[['','All'],['first','🔴 Open First'],['store','📦 Storage'],['normal','Normal']];
+  const priBtns=priOpts.map(([v,l])=>`<button class="export-chip${(!v&&!exportFilters.priorities.length)||exportFilters.priorities.includes(v)?' sel':''}" onclick="toggleExportFilter('priorities','${v}')">${l}</button>`).join('');
+  const ef=document.getElementById('export-filters');
+  if(ef) ef.innerHTML=`<div class="export-section"><div class="export-section-label">Destination</div><div class="export-chips">${destBtns}</div></div><div class="export-section"><div class="export-section-label">Type</div><div class="export-chips">${typeBtns}</div></div><div class="export-section"><div class="export-section-label">Priority</div><div class="export-chips">${priBtns}</div></div><div class="export-match-count">${matching.length} item${matching.length!==1?'s':''} match</div>`;
+}
+function shareMoversText(){
+  const items=getExportItems().sort((a,b)=>a.num-b.num);
+  if(!items.length){toast('No items match your filters');return;}
+  const date=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  let lines=['MOVING MANIFEST',date,`${items.length} item${items.length!==1?'s':''}`,'' ];
+  ['box','furniture','artwork'].forEach(type=>{
+    const group=items.filter(b=>(b.type||'box')===type);if(!group.length)return;
+    const hdrs={box:'── BOXES ──',furniture:'── FURNITURE ──',artwork:'── ARTWORK ──'};
+    lines.push(hdrs[type]);
+    group.forEach(b=>{
+      const dim=b.dims&&(b.dims.l||b.dims.w||b.dims.h)?` (${b.dims.l||'?'}×${b.dims.w||'?'}×${b.dims.h||'?'}")`:'';
+      const dest=b.dest?` → ${b.dest}`:'';
+      const pri=b.priority==='first'?' ★ OPEN FIRST':b.priority==='store'?' [STORAGE]':'';
+      lines.push(`${b.num}. ${b.label}${dim}${dest}${pri}`);
+      (b.groups||[]).forEach(g=>{
+        const gd=g.dims&&(g.dims.l||g.dims.w||g.dims.h)?` ${g.dims.l||'?'}×${g.dims.w||'?'}×${g.dims.h||'?'}"` :'';
+        lines.push(`   • ${g.name}${gd}`);
+        (g.subitems||[]).forEach(si=>lines.push(`     - ${si.name}`));
+      });
+    });
+    lines.push('');
+  });
+  lines.push('Generated by Boxly');
+  const text=lines.join('\n');
+  if(navigator.share){navigator.share({title:'Moving Manifest',text}).catch(e=>{if(e.name!=='AbortError')copyToClipboard(text);});}
+  else copyToClipboard(text);
+  closeManifest();
+}
+async function shareInventoryPDF(){closeManifest();showLoading('Fetching photos…');try{await renderPDFPreview();navTo('pdf');}catch(e){toast('Error: '+e.message);}hideLoading();}
+function printPDF(){
+  const page=document.getElementById('page-pdf'),body=document.getElementById('pdf-body');
+  const op=page.getAttribute('style')||'',ob=body.getAttribute('style')||'';
+  page.style.cssText='display:block;height:auto;overflow:visible;position:relative';
+  body.style.cssText='padding:16px;height:auto;overflow:visible';
+  document.body.style.overflow='visible';
+  setTimeout(()=>{window.print();setTimeout(()=>{page.setAttribute('style',op);body.setAttribute('style',ob);document.body.style.overflow='';},1000);},150);
+}
+async function urlToBase64(url){try{const r=await fetch(url,{mode:'cors'});if(!r.ok)return null;const b=await r.blob();return new Promise(resolve=>{const rd=new FileReader();rd.onloadend=()=>resolve(rd.result);rd.onerror=()=>resolve(null);rd.readAsDataURL(b);});}catch{return null;}}
+function copyToClipboard(text){if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard'));}else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copied to clipboard');}}
+async function renderPDFPreview(){
+  const items=getExportItems().sort((a,b)=>a.num-b.num);
+  const container=document.getElementById('pdf-body');
+  if(!items.length){container.innerHTML='<div class="pdf-empty">No items match your filters.</div>';return;}
+  const allUrls=new Set();
+  items.forEach(b=>{(b.photos||[]).forEach(u=>allUrls.add(u));(b.groups||[]).forEach(g=>{(g.photos||[]).forEach(u=>allUrls.add(u));(g.subitems||[]).forEach(si=>(si.photos||[]).forEach(u=>allUrls.add(u)));});});
+  const urlArr=[...allUrls];
+  if(urlArr.length)showLoading(`Loading ${urlArr.length} photo${urlArr.length!==1?'s':''}…`);
+  const b64Arr=await Promise.all(urlArr.map(u=>urlToBase64(u)));
+  const imgMap={};urlArr.forEach((u,i)=>{if(b64Arr[i])imgMap[u]=b64Arr[i];});
+  const imgEl=url=>`<img src="${imgMap[url]||url}" onerror="this.style.display='none'">`;
+  const tl={box:'📦 Boxes',furniture:'🛋 Furniture',artwork:'🖼 Artwork'};
+  let html='';
+  ['box','furniture','artwork'].forEach(type=>{
+    const group=items.filter(b=>(b.type||'box')===type);if(!group.length)return;
+    html+=`<div class="pdf-type-hdr">${tl[type]}</div>`;
+    group.forEach(b=>{
+      const dim=b.dims&&(b.dims.l||b.dims.w||b.dims.h)?`${b.dims.l||'?'}×${b.dims.w||'?'}×${b.dims.h||'?'}"` :'';
+      const bp=(b.photos||[]).map(u=>imgEl(u)).join('');
+      const gi=(b.groups||[]).map(g=>{
+        const gd=g.dims&&(g.dims.l||g.dims.w||g.dims.h)?`${g.dims.l||'?'}×${g.dims.w||'?'}×${g.dims.h||'?'}"` :'';
+        const gp=(g.photos||[]).map(u=>imgEl(u)).join('');
+        const subs=(g.subitems||[]).map(si=>{const sp=(si.photos||[]).map(u=>imgEl(u)).join('');return `<div class="pdf-sub"><div class="pdf-sub-dot"></div><div><div class="pdf-sub-name">${x(si.name)}</div>${sp?`<div class="pdf-sub-photos">${sp}</div>`:''}</div></div>`;}).join('');
+        return `<div class="pdf-item"><div class="pdf-item-name">${x(g.name)}</div>${gd?`<div class="pdf-item-dim">${gd}</div>`:''} ${g.notes?`<div class="pdf-item-note">${x(g.notes)}</div>`:''} ${gp?`<div class="pdf-item-photos">${gp}</div>`:''} ${subs?`<div class="pdf-subitems">${subs}</div>`:''}</div>`;
+      }).join('');
+      html+=`<div class="pdf-box"><div class="pdf-box-hdr"><span class="pdf-bnum">#${b.num}</span><span class="pdf-bname">${x(b.label)}</span>${dim?`<span class="pdf-bdim">${dim}</span>`:''} ${b.dest?(()=>{const dc=destColor(b.dest);return `<span class="tag" style="background:${dc.bg};color:${dc.color}">${x(b.dest)}</span>`;})():''}</div>${bp?`<div class="pdf-box-photos">${bp}</div>`:''} ${gi||'<div class="pdf-item" style="color:var(--text3);font-style:italic">No items recorded</div>'}</div>`;
+    });
+  });
+  container.innerHTML=html;
 }
 
 load(); renderHome(); pullSheet();
