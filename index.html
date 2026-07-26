@@ -598,6 +598,8 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 .dim-preset-btn:active { opacity: 0.7; }
 
 /* ── PRESET SHEET ────────────────────────────────────── */
+#dest-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: flex-end; justify-content: center; }
+#dest-overlay.open { display: flex; }
 #preset-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: flex-end; justify-content: center; }
 #preset-overlay.open { display: flex; }
 .preset-sheet { background: var(--surface); border-radius: var(--r-xl) var(--r-xl) 0 0; width: 100%; max-width: 430px; max-height: 70vh; display: flex; flex-direction: column; padding-bottom: calc(var(--sab) + 8px); }
@@ -944,6 +946,22 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   <div id="pdf-body" style="padding:16px 16px calc(var(--sab) + 60px)"></div>
 </div>
 
+<!-- DESTINATION MANAGER SHEET -->
+<div id="dest-overlay" onclick="if(event.target===this)closeDestManager()">
+  <div class="preset-sheet">
+    <div class="preset-handle"></div>
+    <div class="preset-hdr">
+      <span class="preset-title">Destinations</span>
+      <button class="preset-close" onclick="closeDestManager()">✕</button>
+    </div>
+    <div class="preset-list" id="dest-list"></div>
+    <div style="padding:10px 16px 0;display:flex;gap:8px">
+      <input class="input" id="dest-new-input" placeholder="Add destination…" style="flex:1;font-size:15px;padding:11px 14px" onkeydown="if(event.key==='Enter')addDestination()">
+      <button class="btn btn-blue btn-sm btn-inline" onclick="addDestination()" style="padding:11px 18px">Add</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <!-- AI SHEET -->
@@ -1148,17 +1166,46 @@ function destOptions(selected) {
   return opts;
 }
 function openDestManager() {
-  const current = S.destinations.join('\n');
-  const result = prompt('Edit destinations (one per line):', current);
-  if (result === null) return;
-  S.destinations = result.split('\n').map(d=>d.trim()).filter(Boolean);
-  saveDestinations();
-  // Refresh any open selects
+  renderDestList();
+  document.getElementById('dest-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('dest-new-input').focus(), 100);
+}
+function closeDestManager() {
+  document.getElementById('dest-overlay').classList.remove('open');
+  // Refresh open selects with current value preserved
   ['new-box-dest','box-dest-select'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { const val = el.value; el.innerHTML = destOptions(val); }
   });
-  toast('Destinations updated');
+}
+function renderDestList() {
+  const el = document.getElementById('dest-list');
+  if (!S.destinations.length) {
+    el.innerHTML = '<div class="empty" style="padding:24px"><p>No destinations yet.<br>Add one below.</p></div>';
+    return;
+  }
+  el.innerHTML = S.destinations.map((d,i) => `
+    <div class="preset-item">
+      <span class="preset-name">${x(d)}</span>
+      <button class="preset-del" onclick="delDestination(${i})">✕</button>
+    </div>`).join('');
+}
+function addDestination() {
+  const inp = document.getElementById('dest-new-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (S.destinations.includes(val)) { toast('Already exists'); return; }
+  S.destinations.push(val);
+  saveDestinations();
+  renderDestList();
+  inp.value = '';
+  inp.focus();
+  toast(`"${val}" added`);
+}
+function delDestination(i) {
+  S.destinations.splice(i, 1);
+  saveDestinations();
+  renderDestList();
 }
 
 // ── TABS & TYPE ──────────────────────────────────────────
