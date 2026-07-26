@@ -517,6 +517,9 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
 }
 
 
+
+/* ── EXPORT BUILDER */
+.export-section{margin-bottom:14px}.export-section-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}.export-chips{display:flex;flex-wrap:wrap;gap:6px}.export-chip{padding:7px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);font-family:inherit;transition:all .12s}.export-chip.sel{border-color:var(--blue);background:rgba(0,122,255,.08);color:var(--blue);font-weight:600}.export-match-count{font-size:13px;color:var(--text3);text-align:center;padding:6px 0 2px;font-style:italic}
 /* ── BULK EDIT ───────────────────────────────────────── */
 .bulk-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
@@ -1058,6 +1061,14 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   </div>
 </div>
 
+<!-- SORT SHEET -->
+<div id="sort-overlay" onclick="if(event.target===this)closeSortSheet()">
+  <div class="bulk-sheet">
+    <div class="bulk-sheet-handle"></div>
+    <div class="bulk-sheet-title">Sort By</div>
+    <div class="bulk-sheet-options" id="sort-sheet-options"></div>
+  </div>
+</div>
 </div><!-- /app -->
 
 <!-- AI SHEET -->
@@ -1361,7 +1372,9 @@ function renderDestFilterRow() {
   const row = document.getElementById('dest-filter-row');
   if (!row) return;
   if (!S.destinations.length) { row.innerHTML=''; return; }
-  row.innerHTML = S.destinations.map(d => {
+  const _allA = !S.activeDestFilter;
+  let _pills = `<button onclick="setDestFilter('')" style="padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid ${_allA?'var(--text)':'var(--border)'};background:${_allA?'var(--text)':'var(--surface)'};color:${_allA?'var(--bg)':'var(--text2)'}">All</button>`;
+  _pills += S.destinations.map(d => {
     const dc = destColor(d);
     const active = S.activeDestFilter === d;
     return `<button onclick="setDestFilter('${x(d)}')" style="
