@@ -516,6 +516,60 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   #pdf-body .pdf-box { break-inside:avoid; border:1px solid #ccc; }
 }
 
+
+/* ── BULK EDIT ───────────────────────────────────────── */
+.bulk-bar {
+  position: sticky; bottom: 0; z-index: 30;
+  background: var(--text); color: var(--bg);
+  padding: 12px 16px calc(var(--sab) + 12px);
+  display: none; flex-direction: column; gap: 10px;
+  border-top: 1px solid var(--border);
+}
+.bulk-bar.active { display: flex; }
+.bulk-bar-top { display: flex; align-items: center; justify-content: space-between; }
+.bulk-count { font-size: 14px; font-weight: 700; }
+.bulk-cancel { background: none; border: none; color: var(--bg); font-size: 13px; opacity: 0.7; cursor: pointer; font-family: inherit; }
+.bulk-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.bulk-action {
+  flex: 1; min-width: 120px; padding: 10px 12px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--r-md); font-size: 13px; font-weight: 600;
+  color: var(--bg); cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.bulk-action:active { opacity: 0.7; }
+.bulk-action.danger { background: rgba(255,59,48,0.25); border-color: rgba(255,59,48,0.4); color: #ff3b30; }
+@media (prefers-color-scheme: dark) {
+  .bulk-bar { background: #1c1c1e; color: var(--text); border-top-color: var(--border); }
+  .bulk-cancel { color: var(--text2); }
+  .bulk-action { background: var(--surface2); border-color: var(--border); color: var(--text); }
+}
+.box-card.bulk-selected { border: 2px solid var(--blue); }
+.bulk-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--surface);
+  display: none; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.12s; color: #fff; font-size: 12px;
+}
+.bulk-mode .bulk-check { display: flex; }
+.bulk-mode .box-card.bulk-selected .bulk-check { background: var(--blue); border-color: var(--blue); }
+
+/* BULK ACTION SHEET */
+#bulk-sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 300; align-items: flex-end; justify-content: center; }
+#bulk-sheet-overlay.open { display: flex; }
+.bulk-sheet { background: var(--surface); border-radius: var(--r-xl) var(--r-xl) 0 0; width: 100%; max-width: 430px; padding-bottom: calc(var(--sab) + 16px); }
+.bulk-sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+.bulk-sheet-title { font-size: 16px; font-weight: 700; padding: 14px 20px 8px; }
+.bulk-sheet-options { display: flex; flex-direction: column; padding: 0 16px 16px; gap: 8px; }
+.bulk-opt {
+  padding: 13px 16px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-md); font-size: 15px; font-weight: 500;
+  cursor: pointer; text-align: left; color: var(--text); font-family: inherit;
+  transition: background 0.1s;
+}
+.bulk-opt:active { background: var(--bg); }
+.bulk-opt.selected { border-color: var(--blue); background: rgba(0,122,255,0.08); color: var(--blue); font-weight: 600; }
+
 /* ── TABS ────────────────────────────────────────────── */
 .tabs {
   display: flex; gap: 0;
@@ -697,6 +751,32 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
       </button>
       <div style="height:12px"></div>
       <div class="box-list" id="box-list"><div class="empty"><div class="empty-icon">📦</div><p>No boxes yet.<br>Tap above to get started.</p></div></div>
+    </div>
+  </div>
+
+  <!-- Bulk edit bar -->
+  <div class="bulk-bar" id="bulk-bar">
+    <div class="bulk-bar-top">
+      <span class="bulk-count" id="bulk-count">0 selected</span>
+      <button class="bulk-cancel" onclick="exitBulkMode()">Cancel</button>
+    </div>
+    <div class="bulk-actions">
+      <button class="bulk-action" onclick="bulkActionSheet('destination')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Destination
+      </button>
+      <button class="bulk-action" onclick="bulkActionSheet('priority')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Priority
+      </button>
+      <button class="bulk-action" onclick="bulkActionSheet('type')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Type
+      </button>
+      <button class="bulk-action danger" onclick="bulkDelete()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Delete
+      </button>
     </div>
   </div>
 </div>
@@ -966,6 +1046,15 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   </div>
 </div>
 
+<!-- BULK ACTION SHEET -->
+<div id="bulk-sheet-overlay" onclick="if(event.target===this)closeBulkSheet()">
+  <div class="bulk-sheet">
+    <div class="bulk-sheet-handle"></div>
+    <div class="bulk-sheet-title" id="bulk-sheet-title">Set Destination</div>
+    <div class="bulk-sheet-options" id="bulk-sheet-options"></div>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <!-- AI SHEET -->
@@ -1068,7 +1157,9 @@ const PRIORITIES = { normal: { label:'Normal', cls:'tag-normal' }, first: { labe
 // ── STATE ────────────────────────────────────────────────
 let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box', presets:[], presetTarget:null, activeTab:'all', selectedType:'box', destinations:['New York','Sedona'], activeDestFilter:'' };
 let navStack = ['home'];
-let scrollPos = {}; // stores scroll position per page
+let scrollPos = {};
+let bulkMode = false;
+let bulkSelected = new Set(); // stores scroll position per page
 
 // ── PERSIST ──────────────────────────────────────────────
 function save() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(S.boxes)); } catch {} }
@@ -1280,6 +1371,117 @@ function renderDestFilterRow() {
   }).join('');
 }
 
+
+
+// Long press for bulk mode
+let longPressTimer = null;
+let longPressBoxId = null;
+function startLongPress(boxId) {
+  longPressBoxId = boxId;
+  longPressTimer = setTimeout(() => {
+    if (!bulkMode) {
+      // Haptic feedback if available
+      if (navigator.vibrate) navigator.vibrate(30);
+      enterBulkMode(boxId);
+    }
+  }, 500);
+}
+function cancelLongPress() {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+}
+
+// ── BULK EDIT ─────────────────────────────────────────────
+function enterBulkMode(boxId) {
+  bulkMode = true;
+  bulkSelected = new Set([boxId]);
+  document.getElementById('box-list').classList.add('bulk-mode');
+  document.getElementById('bulk-bar').classList.add('active');
+  updateBulkUI();
+  renderHome();
+}
+
+function exitBulkMode() {
+  bulkMode = false;
+  bulkSelected = new Set();
+  document.getElementById('box-list').classList.remove('bulk-mode');
+  document.getElementById('bulk-bar').classList.remove('active');
+  renderHome();
+}
+
+function toggleBulkSelect(boxId) {
+  if (bulkSelected.has(boxId)) bulkSelected.delete(boxId);
+  else bulkSelected.add(boxId);
+  updateBulkUI();
+  // Update just this card's visual
+  const card = document.querySelector(`[data-box-id="${boxId}"]`);
+  if (card) {
+    card.classList.toggle('bulk-selected', bulkSelected.has(boxId));
+    const check = card.querySelector('.bulk-check');
+    if (check) check.textContent = bulkSelected.has(boxId) ? '✓' : '';
+  }
+}
+
+function updateBulkUI() {
+  const n = bulkSelected.size;
+  const el = document.getElementById('bulk-count');
+  if (el) el.textContent = `${n} box${n!==1?'es':''} selected`;
+}
+
+let bulkActionType = '';
+function bulkActionSheet(type) {
+  bulkActionType = type;
+  const titles = { destination:'Set Destination', priority:'Set Priority', type:'Set Type' };
+  document.getElementById('bulk-sheet-title').textContent = titles[type];
+  let opts = [];
+  if (type === 'destination') {
+    opts = ['', ...S.destinations].map(d => ({
+      val: d, label: d || 'No destination'
+    }));
+  } else if (type === 'priority') {
+    opts = [
+      { val:'normal', label:'Normal' },
+      { val:'first',  label:'🔴 Open First' },
+      { val:'store',  label:'📦 Storage Only' },
+    ];
+  } else if (type === 'type') {
+    opts = [
+      { val:'box',       label:'📦 Box' },
+      { val:'furniture', label:'🛋 Furniture' },
+      { val:'artwork',   label:'🖼 Artwork' },
+    ];
+  }
+  document.getElementById('bulk-sheet-options').innerHTML = opts.map(o =>
+    `<button class="bulk-opt" onclick="applyBulkAction('${x(o.val)}')">${o.label}</button>`
+  ).join('');
+  document.getElementById('bulk-sheet-overlay').classList.add('open');
+}
+
+function closeBulkSheet() {
+  document.getElementById('bulk-sheet-overlay').classList.remove('open');
+}
+
+function applyBulkAction(val) {
+  S.boxes.forEach(b => {
+    if (!bulkSelected.has(b.id)) return;
+    if (bulkActionType === 'destination') b.dest = val;
+    if (bulkActionType === 'priority')    b.priority = val;
+    if (bulkActionType === 'type')        b.type = val;
+  });
+  save();
+  closeBulkSheet();
+  renderHome();
+  toast(`Updated ${bulkSelected.size} box${bulkSelected.size!==1?'es':''}`);
+}
+
+function bulkDelete() {
+  const n = bulkSelected.size;
+  if (!confirm(`Delete ${n} box${n!==1?'es':''}? This cannot be undone.`)) return;
+  S.boxes = S.boxes.filter(b => !bulkSelected.has(b.id));
+  save();
+  exitBulkMode();
+  toast(`${n} box${n!==1?'es':''} deleted`);
+}
+
 // ── TABS & TYPE ──────────────────────────────────────────
 function setTab(tab) {
   S.activeTab = tab;
@@ -1346,8 +1548,13 @@ function renderHome() {
       b.room?`<span class="tag tag-room">${x(b.room)}</span>`:'',
       b.priority&&b.priority!=='normal'?`<span class="tag ${p.cls}">${p.label}</span>`:'',
     ].filter(Boolean).join('');
-    return `<button class="box-card" onclick="openBox(${b.id})">
+    const isSel = bulkSelected.has(b.id);
+    return `<button class="box-card${isSel?' bulk-selected':''}" data-box-id="${b.id}"
+      onclick="bulkMode ? toggleBulkSelect(${b.id}) : openBox(${b.id})"
+      oncontextmenu="event.preventDefault(); if(!bulkMode) enterBulkMode(${b.id})"
+      ontouchstart="startLongPress(${b.id})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()">
       <div class="box-card-top">
+        <div class="bulk-check">${isSel?'✓':''}</div>
         <div class="box-num-badge">${b.num}</div>
         <div class="box-info">
           <div class="box-name">${x(b.label)}</div>
