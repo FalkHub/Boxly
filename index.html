@@ -686,6 +686,9 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
       </button>
     </div>
 
+    <!-- Destination filter pills -->
+    <div id="dest-filter-row" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+
     <!-- + New button + list -->
     <div>
       <button class="btn btn-blue" id="new-entry-btn" onclick="navTo('add-box')">
@@ -760,6 +763,7 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
         <span class="grouped-row-label">Destination</span>
         <select class="grouped-row-input" id="box-dest-select" onchange="saveBoxMeta()">
         </select>
+        <button onclick="openDestManager()" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 0 8px;white-space:nowrap;flex-shrink:0">+ Edit</button>
       </div>
       <div class="grouped-row">
         <span class="grouped-row-label">Type</span>
@@ -1062,7 +1066,7 @@ const ROOMS = ['Living Room','Bedroom','Kitchen','Bathroom','Office','Storage','
 const PRIORITIES = { normal: { label:'Normal', cls:'tag-normal' }, first: { label:'Open First', cls:'tag-first' }, store: { label:'Storage Only', cls:'tag-store' } };
 
 // ── STATE ────────────────────────────────────────────────
-let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box', presets:[], presetTarget:null, activeTab:'all', selectedType:'box', destinations:['New York','Sedona'] };
+let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box', presets:[], presetTarget:null, activeTab:'all', selectedType:'box', destinations:['New York','Sedona'], activeDestFilter:'' };
 let navStack = ['home'];
 let scrollPos = {}; // stores scroll position per page
 
@@ -1239,12 +1243,41 @@ function addDestination() {
   renderDestList();
   inp.value = '';
   inp.focus();
+  renderDestFilterRow();
   toast(`"${val}" added`);
 }
 function delDestination(i) {
+  const removed = S.destinations[i];
   S.destinations.splice(i, 1);
+  if (S.activeDestFilter === removed) S.activeDestFilter = '';
   saveDestinations();
   renderDestList();
+  renderDestFilterRow();
+  renderHome();
+}
+
+
+function setDestFilter(dest) {
+  S.activeDestFilter = (S.activeDestFilter === dest) ? '' : dest; // toggle
+  renderDestFilterRow();
+  renderHome();
+}
+
+function renderDestFilterRow() {
+  const row = document.getElementById('dest-filter-row');
+  if (!row) return;
+  if (!S.destinations.length) { row.innerHTML=''; return; }
+  row.innerHTML = S.destinations.map(d => {
+    const dc = destColor(d);
+    const active = S.activeDestFilter === d;
+    return `<button onclick="setDestFilter('${x(d)}')" style="
+      padding:6px 12px; border-radius:20px; font-size:12px; font-weight:600;
+      cursor:pointer; border:1.5px solid ${active ? dc.color : 'var(--border)'};
+      background:${active ? dc.bg : 'var(--surface)'};
+      color:${active ? dc.color : 'var(--text2)'};
+      transition:all 0.15s;
+    ">${x(d)}</button>`;
+  }).join('');
 }
 
 // ── TABS & TYPE ──────────────────────────────────────────
@@ -1296,7 +1329,11 @@ function renderHome() {
   const filtered = (tab === 'all'
     ? S.boxes.slice()
     : S.boxes.filter(b=>(b.type||'box')===tab)
-  ).sort((a,b)=>b.id-a.id);
+  ).filter(b => !S.activeDestFilter || (b.dest||'')=== S.activeDestFilter)
+   .sort((a,b)=>b.id-a.id);
+
+  // Render destination filter pills
+  renderDestFilterRow();
   const el=document.getElementById('box-list');
   const emptyIcons = { all:'📦', box:'📦', furniture:'🛋', artwork:'🖼' };
   const emptyMsgs  = { all:'Nothing added yet.', box:'No boxes yet.', furniture:'No furniture yet.', artwork:'No artwork yet.' };
