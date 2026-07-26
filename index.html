@@ -717,6 +717,13 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
         <option>Bathroom</option><option>Office</option><option>Storage</option><option>Other</option>
       </select>
     </div>
+    <div class="field-lbl">Destination</div>
+    <div class="sel-row" style="gap:0">
+      <select id="new-box-dest" style="flex:1">
+        <option value="">No destination</option>
+      </select>
+      <button onclick="openDestManager()" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 4px;white-space:nowrap">+ Edit</button>
+    </div>
     <div class="field-lbl">Priority</div>
     <div class="sel-row">
       <select id="new-box-priority">
@@ -747,6 +754,11 @@ textarea.input { resize: none; min-height: 90px; line-height: 1.5; }
   <div class="pg">
     <!-- Box meta (editable) -->
     <div class="grouped">
+      <div class="grouped-row">
+        <span class="grouped-row-label">Destination</span>
+        <select class="grouped-row-input" id="box-dest-select" onchange="saveBoxMeta()">
+        </select>
+      </div>
       <div class="grouped-row">
         <span class="grouped-row-label">Type</span>
         <select class="grouped-row-input" id="box-type-select" onchange="saveBoxMeta()">
@@ -1032,15 +1044,17 @@ const ROOMS = ['Living Room','Bedroom','Kitchen','Bathroom','Office','Storage','
 const PRIORITIES = { normal: { label:'Normal', cls:'tag-normal' }, first: { label:'Open First', cls:'tag-first' }, store: { label:'Storage Only', cls:'tag-store' } };
 
 // ── STATE ────────────────────────────────────────────────
-let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box', presets:[], presetTarget:null, activeTab:'all', selectedType:'box' };
+let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box', presets:[], presetTarget:null, activeTab:'all', selectedType:'box', destinations:['New York','Sedona'] };
 let navStack = ['home'];
 
 // ── PERSIST ──────────────────────────────────────────────
 function save() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(S.boxes)); } catch {} }
 function savePresets() { try { localStorage.setItem(LOCAL_KEY+'-presets', JSON.stringify(S.presets)); } catch {} }
+function saveDestinations() { try { localStorage.setItem(LOCAL_KEY+'-destinations', JSON.stringify(S.destinations)); } catch {} }
 function load() {
   try { const r=localStorage.getItem(LOCAL_KEY); if(r) S.boxes=JSON.parse(r); } catch {}
   try { const p=localStorage.getItem(LOCAL_KEY+'-presets'); if(p) S.presets=JSON.parse(p); } catch {}
+  try { const d=localStorage.getItem(LOCAL_KEY+'-destinations'); if(d) S.destinations=JSON.parse(d); } catch {}
 }
 function B()    { return S.boxes.find(b=>b.id===S.activeBoxId)||null; }
 function G()    { const b=B(); return b?(b.groups.find(g=>g.id===S.activeGrpId)||null):null; }
@@ -1101,6 +1115,8 @@ function render(page) {
     const tabTitles = { all:'New Box', box:'New Box', furniture:'New Furniture', artwork:'New Artwork' };
     title.textContent = tabTitles[S.activeTab||'box'];
     selectType(S.activeTab==='all' ? 'box' : (S.activeTab||'box'));
+    const nd=document.getElementById('new-box-dest');
+    if(nd) nd.innerHTML=destOptions('');
     // Pre-fill next box number
     const nextNum = S.boxes.length ? Math.max(...S.boxes.map(b=>b.num))+1 : 1;
     document.getElementById('new-box-num').placeholder = `Auto: ${nextNum}`;
@@ -1122,6 +1138,28 @@ function render(page) {
 }
 
 // ── HOME ─────────────────────────────────────────────────
+
+
+// ── DESTINATIONS ─────────────────────────────────────────
+function destOptions(selected) {
+  const opts = ['', ...S.destinations].map(d =>
+    `<option value="${x(d)}" ${d===selected?'selected':''}>${d||'No destination'}</option>`
+  ).join('');
+  return opts;
+}
+function openDestManager() {
+  const current = S.destinations.join('\n');
+  const result = prompt('Edit destinations (one per line):', current);
+  if (result === null) return;
+  S.destinations = result.split('\n').map(d=>d.trim()).filter(Boolean);
+  saveDestinations();
+  // Refresh any open selects
+  ['new-box-dest','box-dest-select'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { const val = el.value; el.innerHTML = destOptions(val); }
+  });
+  toast('Destinations updated');
+}
 
 // ── TABS & TYPE ──────────────────────────────────────────
 function setTab(tab) {
@@ -1194,6 +1232,7 @@ function renderHome() {
             ${b.groups.length} item${b.groups.length!==1?'s':''}
             ${b.dims&&(b.dims.l||b.dims.w||b.dims.h)?`<span style="color:var(--text3)">${b.dims.l||'?'}×${b.dims.w||'?'}×${b.dims.h||'?'} in</span>`:''}
             ${(S.activeTab==='all')?`<span class="tag tag-type-${b.type||'box'}">${{box:'📦 Box',furniture:'🛋 Furn.',artwork:'🖼 Art'}[b.type||'box']}</span>`:''}
+            ${b.dest?`<span class="tag" style="background:rgba(52,199,89,0.12);color:var(--green)">${x(b.dest)}</span>`:''}
             ${tags?'<span class="box-tags">'+tags+'</span>':''}
           </div>
         </div>
@@ -1217,7 +1256,8 @@ function createBox(){
   const ch=document.getElementById('new-box-h').value;
   const dims=(cl||cw||ch)?{l:cl,w:cw,h:ch}:null;
   const type=S.selectedType||'box';
-  const b={id:Date.now(),num,label,room,priority,dims,type,photos:[],groups:[]};
+  const dest=document.getElementById('new-box-dest').value||'';
+  const b={id:Date.now(),num,label,room,priority,dims,type,dest,photos:[],groups:[]};
   S.boxes.push(b); save();
   S.activeBoxId=b.id;
   navStack[navStack.length-1]='box';
@@ -1230,6 +1270,9 @@ function createBox(){
 function renderBox(){
   const b=B(); if(!b) return;
   document.getElementById('hdr-title').textContent=`Box ${b.num} — ${b.label}`;
+  // Populate destination dropdown dynamically
+  const destSel = document.getElementById('box-dest-select');
+  if (destSel) { destSel.innerHTML = destOptions(b.dest||''); }
   document.getElementById('box-type-select').value=b.type||'box';
   document.getElementById('box-room-select').value=b.room||'';
   document.getElementById('box-priority-select').value=b.priority||'normal';
@@ -1272,6 +1315,8 @@ function renderBox(){
 function saveBoxMeta(){
   const b=B(); if(!b) return;
   b.type=document.getElementById('box-type-select').value;
+  const destEl=document.getElementById('box-dest-select');
+  if(destEl) b.dest=destEl.value;
   b.room=document.getElementById('box-room-select').value;
   b.priority=document.getElementById('box-priority-select').value;
   const nv=document.getElementById('box-num-input').value;
