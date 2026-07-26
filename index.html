@@ -1064,6 +1064,7 @@ const PRIORITIES = { normal: { label:'Normal', cls:'tag-normal' }, first: { labe
 // ── STATE ────────────────────────────────────────────────
 let S = { boxes:[], activeBoxId:null, activeGrpId:null, aiItems:[], aiMode:'box', presets:[], presetTarget:null, activeTab:'all', selectedType:'box', destinations:['New York','Sedona'] };
 let navStack = ['home'];
+let scrollPos = {}; // stores scroll position per page
 
 // ── PERSIST ──────────────────────────────────────────────
 function save() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(S.boxes)); } catch {} }
@@ -1114,8 +1115,22 @@ async function pullSheet() {
 }
 
 // ── NAV ──────────────────────────────────────────────────
-function navTo(page) { navStack.push(page); render(page); }
-function navBack()   { if(navStack.length>1) navStack.pop(); render(navStack[navStack.length-1]); }
+function navTo(page) {
+  // Save scroll position of current page before leaving
+  const curPage = navStack[navStack.length-1];
+  const curEl = document.getElementById('page-'+curPage);
+  if (curEl) scrollPos[curPage] = curEl.scrollTop;
+  navStack.push(page);
+  render(page);
+}
+function navBack() {
+  // Save current page scroll
+  const curPage = navStack[navStack.length-1];
+  const curEl = document.getElementById('page-'+curPage);
+  if (curEl) scrollPos[curPage] = curEl.scrollTop;
+  if (navStack.length>1) navStack.pop();
+  render(navStack[navStack.length-1]);
+}
 
 function render(page) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1129,6 +1144,11 @@ function render(page) {
   if(shareBtn) shareBtn.style.display = page==='home' ? 'flex' : 'none';
 
   if(page==='home')    { title.textContent='📦 Boxly'; renderHome(); }
+  // Restore scroll position
+  setTimeout(() => {
+    const pageEl = document.getElementById('page-'+page);
+    if (pageEl && scrollPos[page]) pageEl.scrollTop = scrollPos[page];
+  }, 0);
   if(page==='add-box') {
     const tabTitles = { all:'New Box', box:'New Box', furniture:'New Furniture', artwork:'New Artwork' };
     title.textContent = tabTitles[S.activeTab||'box'];
@@ -1158,12 +1178,31 @@ function render(page) {
 // ── HOME ─────────────────────────────────────────────────
 
 
+
+function destColor(dest) {
+  const colors = {
+    'New York':  { bg:'rgba(0,122,255,0.12)',   color:'var(--blue)' },
+    'Sedona':    { bg:'rgba(255,149,0,0.15)',    color:'var(--orange)' },
+  };
+  // For any other destination cycle through a palette
+  const palette = [
+    { bg:'rgba(52,199,89,0.12)',   color:'var(--green)' },
+    { bg:'rgba(175,82,222,0.12)',  color:'var(--purple)' },
+    { bg:'rgba(255,59,48,0.12)',   color:'var(--red)' },
+    { bg:'rgba(90,200,250,0.15)',  color:'#5ac8fa' },
+  ];
+  if (colors[dest]) return colors[dest];
+  // Hash the string to pick a consistent color
+  let hash = 0;
+  for (let i=0; i<dest.length; i++) hash = dest.charCodeAt(i) + ((hash<<5)-hash);
+  return palette[Math.abs(hash) % palette.length];
+}
+
 // ── DESTINATIONS ─────────────────────────────────────────
 function destOptions(selected) {
-  const opts = ['', ...S.destinations].map(d =>
+  return ['', ...S.destinations].map(d =>
     `<option value="${x(d)}" ${d===selected?'selected':''}>${d||'No destination'}</option>`
   ).join('');
-  return opts;
 }
 function openDestManager() {
   renderDestList();
@@ -1279,7 +1318,7 @@ function renderHome() {
             ${b.groups.length} item${b.groups.length!==1?'s':''}
             ${b.dims&&(b.dims.l||b.dims.w||b.dims.h)?`<span style="color:var(--text3)">${b.dims.l||'?'}×${b.dims.w||'?'}×${b.dims.h||'?'} in</span>`:''}
             ${(S.activeTab==='all')?`<span class="tag tag-type-${b.type||'box'}">${{box:'📦 Box',furniture:'🛋 Furn.',artwork:'🖼 Art'}[b.type||'box']}</span>`:''}
-            ${b.dest?`<span class="tag" style="background:rgba(52,199,89,0.12);color:var(--green)">${x(b.dest)}</span>`:''}
+            ${b.dest?(()=>{const dc=destColor(b.dest);return `<span class="tag" style="background:${dc.bg};color:${dc.color}">${x(b.dest)}</span>`;})():''}
             ${tags?'<span class="box-tags">'+tags+'</span>':''}
           </div>
         </div>
