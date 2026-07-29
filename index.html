@@ -1203,7 +1203,7 @@ async function pullSheet() {
   try {
     const r=await fetch(SCRIPT_URL+'?action=getAll');
     const d=await r.json();
-    if(d.success && d.items && d.items.length && !S.boxes.length) {
+    if(d.success && d.items && d.items.length) {
       const map={};
       d.items.forEach(row=>{
         const n=parseInt(row.boxNum);
