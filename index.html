@@ -1209,12 +1209,33 @@ async function pullSheet() {
         const n=parseInt(row.boxNum);
         if(!map[n]){
           let bp=[]; try{bp=JSON.parse(row.boxPhotos||'[]');}catch{}
-          map[n]={id:n,num:n,label:row.boxLabel,photos:bp,room:row.room||'',priority:row.priority||'normal',groups:[]};
+          map[n]={id:n,num:n,label:row.boxLabel,photos:bp,room:row.room||'',priority:row.priority||'normal',dest:row.dest||'',type:row.type||'box',groups:[]};
         }
-        if(row.itemId){
+        // Detect schema: old rows have numeric itemId, new rows have [] as itemId
+        // In new schema, itemId field contains [] and itemText field contains the actual numeric ID
+        let realId, realName, realPhotos, realSubs, realNotes;
+        const rawId = String(row.itemId||'');
+        if(rawId === '[]' || rawId === '') {
+          // New schema: itemText is actually the itemId, photoUrl is the itemText
+          realId    = String(row.itemText||'');
+          realName  = String(row.photoUrl||'');
+          realNotes = row.notes||'';
           let ph=[]; try{ph=JSON.parse(row.photoUrls||'[]');}catch{}
+          realPhotos = ph;
           let si=[]; try{si=JSON.parse(row.subitems||'[]');}catch{}
-          map[n].groups.push({id:row.itemId,name:row.itemText,notes:row.notes||'',photos:ph,subitems:si});
+          realSubs = si;
+        } else {
+          // Old schema
+          realId    = rawId;
+          realName  = String(row.itemText||'');
+          realNotes = '';
+          let ph=[]; try{ph=JSON.parse(row.photoUrl||'[]');}catch{ph=[];}
+          if(!Array.isArray(ph)) ph=[];
+          realPhotos = ph;
+          realSubs = [];
+        }
+        if(realId && realName && !/^\[/.test(realName)) {
+          map[n].groups.push({id:realId,name:realName,notes:realNotes,photos:realPhotos,subitems:realSubs});
         }
       });
       S.boxes=Object.values(map).sort((a,b)=>a.num-b.num); save();
